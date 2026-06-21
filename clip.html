@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Casa Visului · Clip Cinematic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-soft: #e0c878;
+    --navy: #0a0f1e;
+    --white: #f5f0e8;
+    --blush: #e8d5c4;
+    --orange: #d4814a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+
+  /* ===== STAGE ===== */
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+  }
+
+  /* ===== VIDEO ===== */
+  #vid {
+    position: absolute;
+    max-width: 100%; max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* ===== FX CANVAS (covers full stage) ===== */
+  #fx {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  /* ===== CINEMATIC BARS ===== */
+  .cine-bar {
+    position: absolute; left: 0; right: 0;
+    background: #000; z-index: 8;
+    transition: height 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #bar-t { top: 0; height: 0; }
+  #bar-b { bottom: 0; height: 0; }
+
+  /* ===== ENTRY FADE ===== */
+  #entry-fade {
+    position: absolute; inset: 0; z-index: 20;
+    background: #000; opacity: 1;
+    transition: opacity 1.6s ease;
+    pointer-events: none;
+  }
+
+  /* ===== CLICK ZONE ===== */
+  #click-zone {
+    position: absolute; inset: 0; z-index: 10; cursor: pointer;
+  }
+
+  /* ===== PLAY ICON ===== */
+  #play-btn {
+    position: absolute; inset: 0; z-index: 11;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  #play-btn.visible { opacity: 1; }
+  #play-btn svg { width: 80px; height: 80px; }
+
+  /* ===== TOP CHROME ===== */
+  #chrome-top {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 9;
+    padding: 18px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    pointer-events: none;
+    opacity: 0; transition: opacity 0.7s ease 0.5s;
+  }
+  #chrome-top.visible { opacity: 1; }
+
+  #back-btn {
+    pointer-events: all;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--gold); text-decoration: none;
+    font-family: 'Inter', sans-serif; font-size: 0.72rem;
+    letter-spacing: 3px; text-transform: uppercase;
+    padding: 8px 14px;
+    background: rgba(10,15,30,0.55);
+    border: 1px solid rgba(201,168,76,0.35);
+    border-radius: 6px; backdrop-filter: blur(8px);
+    transition: color 0.2s, background 0.2s;
+  }
+  #back-btn:hover { color: var(--gold-soft); background: rgba(201,168,76,0.12); }
+
+  #logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem; letter-spacing: 2px;
+    color: var(--gold); opacity: 0.85;
+  }
+
+  /* ===== SOUND TOGGLE ===== */
+  #sound-btn {
+    pointer-events: all; cursor: pointer;
+    background: rgba(10,15,30,0.55); border: 1px solid rgba(201,168,76,0.35);
+    border-radius: 50%; width: 42px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px); transition: background 0.2s;
+    color: var(--gold);
+  }
+  #sound-btn:hover { background: rgba(201,168,76,0.18); }
+  #sound-btn svg { width: 18px; height: 18px; fill: var(--gold); }
+
+  /* ===== PROGRESS BAR ===== */
+  #prog-wrap {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px; background: rgba(255,255,255,0.08); z-index: 9;
+    opacity: 0; transition: opacity 0.6s ease 0.5s;
+  }
+  #prog-wrap.visible { opacity: 1; }
+  #prog-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+    box-shadow: 0 0 10px rgba(201,168,76,0.55);
+    transition: width 0.12s linear;
+  }
+
+  /* ===== TIMESTAMP ===== */
+  #timestamp {
+    position: absolute; bottom: 14px; right: 18px; z-index: 9;
+    font-family: 'Inter', sans-serif; font-size: 0.68rem;
+    letter-spacing: 2px; color: rgba(201,168,76,0.6);
+    opacity: 0; transition: opacity 0.6s ease 0.5s;
+  }
+  #timestamp.visible { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cine-bar { transition: none !important; }
+    #entry-fade { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="vid" src="clip.mp4" loop playsinline preload="auto"></video>
+  <canvas id="fx"></canvas>
+
+  <!-- Cinematic bars -->
+  <div class="cine-bar" id="bar-t"></div>
+  <div class="cine-bar" id="bar-b"></div>
+
+  <!-- Entry fade -->
+  <div id="entry-fade"></div>
+
+  <!-- Click zone -->
+  <div id="click-zone"></div>
+
+  <!-- Play indicator -->
+  <div id="play-btn">
+    <svg viewBox="0 0 80 80" fill="none">
+      <circle cx="40" cy="40" r="38" stroke="rgba(201,168,76,0.55)" stroke-width="1.5"/>
+      <polygon points="32,22 62,40 32,58" fill="rgba(201,168,76,0.92)"/>
+    </svg>
+  </div>
+
+  <!-- Top chrome -->
+  <div id="chrome-top">
+    <a href="index.html" id="back-btn">← Înapoi</a>
+    <div id="logo">Casa Visului</div>
+    <button id="sound-btn" aria-label="Sunet">
+      <svg id="icon-sound" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+      <svg id="icon-mute" viewBox="0 0 24 24" style="display:none"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+    </button>
+  </div>
+
+  <!-- Progress & timestamp -->
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <div id="timestamp">0:00 / 0:00</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const TAU = Math.PI * 2;
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const easeInOut = t => t < 0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;
+
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PR = Math.min(window.devicePixelRatio || 1, 2);
+
+const vid = document.getElementById('vid');
+const fxCanvas = document.getElementById('fx');
+const ctx = fxCanvas.getContext('2d');
+const barT = document.getElementById('bar-t');
+const barB = document.getElementById('bar-b');
+const entryFade = document.getElementById('entry-fade');
+const playBtn = document.getElementById('play-btn');
+const clickZone = document.getElementById('click-zone');
+const chromeTop = document.getElementById('chrome-top');
+const progWrap = document.getElementById('prog-wrap');
+const progFill = document.getElementById('prog-fill');
+const timestamp = document.getElementById('timestamp');
+const soundBtn = document.getElementById('sound-btn');
+const iconSound = document.getElementById('icon-sound');
+const iconMute = document.getElementById('icon-mute');
+
+let SW = 0, SH = 0;   // stage dims
+let VW = 0, VH = 0;   // video display dims
+let VX = 0, VY = 0;   // video position in stage
+let t = 0;
+let started = false;
+let muted = false;
+
+// ============================================================
+// PARTICLE SYSTEM
+// ============================================================
+let dust = [];
+function initDust() {
+  dust = [];
+  for (let i = 0; i < 55; i++) {
+    dust.push({
+      x: rand(VX, VX + VW), y: rand(VY, VY + VH),
+      r: rand(0.3, 1.8), sp: rand(0.08, 0.38),
+      ph: rand(0, TAU), drift: rand(-0.15, 0.15),
+      a: rand(0.15, 0.55)
+    });
+  }
+}
+
+// ============================================================
+// LIGHT LEAKS
+// ============================================================
+const leaks = [
+  { cx: 1.0, cy: 0.0, r: 0.82, period: 14, offset: 0,   col: [255, 218, 142] },
+  { cx: 0.0, cy: 0.0, r: 0.70, period: 20, offset: 5,   col: [212, 129,  74] },
+  { cx: 0.5, cy: 1.0, r: 0.65, period: 17, offset: 9.5, col: [255, 170, 100] },
+  { cx: 1.0, cy: 0.5, r: 0.55, period: 11, offset: 3,   col: [201, 168,  76] },
+];
+
+// ============================================================
+// CAPTION TIMELINE  (times in seconds, looped over vid duration)
+// ============================================================
+const captions = [
+  { at: 0.06, dur: 3.0, text: 'Casa Visului',                      style: 'title',    anim: 'rise' },
+  { at: 0.18, dur: 2.8, text: '76 mp² de libertate',               style: 'body',     anim: 'slide' },
+  { at: 0.30, dur: 2.8, text: 'Lumina devine parte din cameră',    style: 'body',     anim: 'rise' },
+  { at: 0.42, dur: 2.8, text: 'Un ritual zilnic de lux',           style: 'body',     anim: 'slide' },
+  { at: 0.54, dur: 2.8, text: 'Cel mai bun somn din viața ta',     style: 'body',     anim: 'rise' },
+  { at: 0.68, dur: 3.0, text: 'Acasă înseamnă mai mult\ndecât patru pereți', style: 'title', anim: 'rise' },
+  { at: 0.82, dur: 2.5, text: 'O EXPERIENȚĂ IMOBILIARĂ CINEMATICĂ',style: 'tag',      anim: 'fade' },
+  { at: 0.91, dur: 2.2, text: 'București · 2026',                  style: 'location', anim: 'fade' },
+];
+
+// ============================================================
+// RESIZE
+// ============================================================
+function resize() {
+  SW = window.innerWidth; SH = window.innerHeight;
+  const vAsp = (vid.videoWidth || 9) / (vid.videoHeight || 16);
+  const sAsp = SW / SH;
+  if (vAsp < sAsp) { VH = SH; VW = VH * vAsp; }
+  else              { VW = SW; VH = VW / vAsp; }
+  VW = Math.round(VW); VH = Math.round(VH);
+  VX = Math.round((SW - VW) / 2);
+  VY = Math.round((SH - VH) / 2);
+
+  vid.style.width  = VW + 'px';
+  vid.style.height = VH + 'px';
+  vid.style.left   = VX + 'px';
+  vid.style.top    = VY + 'px';
+
+  fxCanvas.width  = SW * PR | 0;
+  fxCanvas.height = SH * PR | 0;
+  ctx.setTransform(PR, 0, 0, PR, 0, 0);
+
+  initDust();
+}
+
+// ============================================================
+// DRAW HELPERS
+// ============================================================
+
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+function drawColorGrade() {
+  // warm gold wash
+  ctx.fillStyle = 'rgba(201,168,76,0.052)';
+  ctx.fillRect(VX, VY, VW, VH);
+  // shadow lift (raised black point)
+  let g = ctx.createLinearGradient(VX, VY, VX, VY + VH);
+  g.addColorStop(0,   'rgba(180,220,255,0.03)');
+  g.addColorStop(0.5, 'rgba(0,0,0,0)');
+  g.addColorStop(1,   'rgba(212,129,74,0.05)');
+  ctx.fillStyle = g; ctx.fillRect(VX, VY, VW, VH);
+}
+
+function drawVignette() {
+  const cx = VX + VW * 0.5, cy = VY + VH * 0.5;
+  let g = ctx.createRadialGradient(cx, cy, VH * 0.22, cx, cy, VH * 0.88);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.70)');
+  ctx.fillStyle = g; ctx.fillRect(VX, VY, VW, VH);
+}
+
+function drawGrain() {
+  const n = (VW * VH * 0.07) | 0;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(VX, VY, VW, VH); ctx.clip();
+  ctx.fillStyle = 'rgba(255,255,255,0.016)';
+  for (let i = 0; i < n; i++)
+    ctx.fillRect((VX + Math.random() * VW) | 0, (VY + Math.random() * VH) | 0, 1, 1);
+  ctx.fillStyle = 'rgba(0,0,0,0.020)';
+  for (let i = 0; i < n; i++)
+    ctx.fillRect((VX + Math.random() * VW) | 0, (VY + Math.random() * VH) | 0, 1, 1);
+  ctx.restore();
+}
+
+function drawScanLines() {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(VX, VY, VW, VH); ctx.clip();
+  ctx.fillStyle = 'rgba(0,0,0,0.035)';
+  for (let y = VY; y < VY + VH; y += 3) ctx.fillRect(VX, y, VW, 1);
+  ctx.restore();
+}
+
+function drawLightLeaks(t) {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(VX, VY, VW, VH); ctx.clip();
+  leaks.forEach(lk => {
+    const phase = ((t + lk.offset) % lk.period) / lk.period;
+    const intensity = Math.pow(Math.sin(phase * Math.PI), 3.5) * 0.20;
+    if (intensity < 0.005) return;
+    const [r, g, b] = lk.col;
+    const gx = VX + lk.cx * VW, gy = VY + lk.cy * VH;
+    let grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, lk.r * Math.max(VW, VH));
+    grad.addColorStop(0,   `rgba(${r},${g},${b},${intensity})`);
+    grad.addColorStop(0.45,`rgba(${r},${g},${b},${intensity * 0.38})`);
+    grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = grad; ctx.fillRect(VX, VY, VW, VH);
+  });
+  ctx.restore();
+}
+
+function drawDust(t) {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(VX, VY, VW, VH); ctx.clip();
+  dust.forEach(d => {
+    d.y -= d.sp;
+    d.x += Math.sin(t * 0.7 + d.ph) * d.drift;
+    if (d.y < VY - 4) { d.y = VY + VH + rand(0, VH * 0.15); d.x = rand(VX, VX + VW); }
+    const a = clamp((0.18 + Math.sin(t * 1.8 + d.ph) * 0.14) * d.a, 0, 0.55);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = 'rgba(255,240,200,1)';
+    ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, TAU); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+// Halation: bright halo when light leaks peak
+function drawHalation(t) {
+  const peakLeak = leaks.reduce((mx, lk) => {
+    const phase = ((t + lk.offset) % lk.period) / lk.period;
+    return Math.max(mx, Math.pow(Math.sin(phase * Math.PI), 3.5));
+  }, 0);
+  if (peakLeak < 0.1) return;
+  const a = peakLeak * 0.06;
+  ctx.fillStyle = `rgba(255,220,140,${a})`;
+  ctx.fillRect(VX, VY, VW, VH);
+}
+
+// ============================================================
+// CAPTIONS
+// ============================================================
+function drawCaptions(vidTime, duration) {
+  if (!duration) return;
+  const norm = (vidTime % duration) / duration;
+
+  captions.forEach(c => {
+    const normEnd = c.at + c.dur / duration;
+    if (norm < c.at || norm > normEnd) return;
+
+    const elapsed = (norm - c.at) * duration;
+    const fadeIn  = 0.45, fadeOut = 0.38;
+    let p;
+    if      (elapsed < fadeIn)          p = elapsed / fadeIn;
+    else if (elapsed > c.dur - fadeOut) p = (c.dur - elapsed) / fadeOut;
+    else                                p = 1;
+    p = easeOut(clamp(p, 0, 1));
+    if (p <= 0) return;
+
+    ctx.save();
+    ctx.globalAlpha = p;
+    ctx.beginPath(); ctx.rect(VX, VY, VW, VH); ctx.clip();
+
+    // Font sizes relative to video width
+    let fs, font, color;
+    const lines = c.text.split('\n');
+
+    switch (c.style) {
+      case 'title':
+        fs = clamp(VW * 0.072, 22, 60);
+        font = `600 ${fs}px 'Playfair Display', serif`;
+        color = '#e0c878';
+        break;
+      case 'body':
+        fs = clamp(VW * 0.040, 13, 30);
+        font = `300 ${fs}px 'Inter', sans-serif`;
+        color = '#e8d5c4';
+        break;
+      case 'tag':
+        fs = clamp(VW * 0.026, 9, 20);
+        font = `500 ${fs}px 'Inter', sans-serif`;
+        color = '#c9a84c';
+        break;
+      case 'location':
+        fs = clamp(VW * 0.022, 8, 17);
+        font = `300 ${fs}px 'Inter', sans-serif`;
+        color = 'rgba(245,240,232,0.60)';
+        break;
+    }
+
+    // Animation offset
+    let offX = 0, offY = 0;
+    if (c.anim === 'rise')  offY = (1 - p) * 24;
+    if (c.anim === 'slide') offX = (1 - p) * -28;
+
+    const padLeft = VX + VW * 0.08;
+    let baseY = VY + VH * 0.80;
+
+    ctx.shadowColor   = 'rgba(0,0,0,0.85)';
+    ctx.shadowBlur    = 18;
+    ctx.shadowOffsetY = 2;
+    ctx.font = font;
+
+    // Tag label above main text
+    if (c.style === 'title' || c.style === 'body') {
+      const tagFs = clamp(VW * 0.020, 8, 14);
+      ctx.font = `400 ${tagFs}px 'Inter', sans-serif`;
+      ctx.fillStyle = 'rgba(201,168,76,0.80)';
+
+      // Gold rule
+      ctx.fillStyle = '#c9a84c';
+      ctx.globalAlpha = p * 0.9;
+      ctx.fillRect(padLeft + offX, baseY - fs * 1.75 + offY, clamp(VW * 0.055, 28, 44), 1.5);
+      ctx.globalAlpha = p;
+
+      ctx.font = font;
+      ctx.fillStyle = color;
+    }
+
+    if (c.style === 'tag') {
+      // Pill badge
+      ctx.font = font;
+      const tw = ctx.measureText(c.text).width;
+      const ph = 9, pv = 6;
+      rrect(ctx, padLeft + offX - ph, baseY - fs - pv + offY, tw + ph*2, fs + pv*2, 5);
+      ctx.fillStyle = 'rgba(10,15,30,0.65)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(201,168,76,0.45)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = color;
+    }
+
+    ctx.font = font;
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'bottom';
+
+    lines.forEach((line, i) => {
+      ctx.fillText(line, padLeft + offX, baseY + offY + i * (fs * 1.22));
+    });
+
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    ctx.restore();
+  });
+}
+
+// ============================================================
+// INTRO GOLD BURST  (plays once on entry)
+// ============================================================
+let burstParticles = null;
+function fireBurst() {
+  burstParticles = [];
+  const cx = VX + VW * 0.5, cy = VY + VH * 0.5;
+  for (let i = 0; i < 60; i++) {
+    const angle = rand(0, TAU);
+    const spd = rand(1.2, 5.0);
+    burstParticles.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd - rand(1, 3),
+      r: rand(0.5, 2.2),
+      life: 1, decay: rand(0.012, 0.028),
+      col: Math.random() < 0.5 ? [201,168,76] : [255,235,160]
+    });
+  }
+}
+function drawBurst() {
+  if (!burstParticles) return;
+  let alive = 0;
+  burstParticles.forEach(p => {
+    if (p.life <= 0) return; alive++;
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.06;
+    p.life -= p.decay;
+    ctx.globalAlpha = clamp(p.life * 0.8, 0, 0.8);
+    const [r, g, b] = p.col;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  if (alive === 0) burstParticles = null;
+}
+
+// ============================================================
+// RENDER LOOP
+// ============================================================
+function render() {
+  requestAnimationFrame(render);
+  if (!started) return;
+
+  t += 0.016;
+  ctx.clearRect(0, 0, SW, SH);
+
+  if (!RM) {
+    drawColorGrade();
+    drawLightLeaks(t);
+    drawHalation(t);
+    drawDust(t);
+    drawScanLines();
+    drawGrain();
+  }
+  drawVignette();
+  drawBurst();
+  drawCaptions(vid.currentTime, vid.duration);
+
+  // Progress bar
+  if (vid.duration) {
+    progFill.style.width = (vid.currentTime / vid.duration * 100) + '%';
+    const cur = formatTime(vid.currentTime);
+    const tot = formatTime(vid.duration);
+    timestamp.textContent = `${cur} / ${tot}`;
+  }
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+}
+
+// ============================================================
+// PLAYBACK
+// ============================================================
+let showingPlay = false;
+let hideTimeout;
+
+function showPlay(on) {
+  clearTimeout(hideTimeout);
+  if (on) { playBtn.classList.add('visible'); showingPlay = true; }
+  else { hideTimeout = setTimeout(() => { playBtn.classList.remove('visible'); showingPlay = false; }, 550); }
+}
+
+async function togglePlay() {
+  if (vid.paused) {
+    try { await vid.play(); showPlay(false); }
+    catch(e) { showPlay(true); }
+  } else {
+    vid.pause(); showPlay(true);
+  }
+}
+
+clickZone.addEventListener('click', togglePlay);
+
+// Sound toggle
+soundBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  muted = !muted;
+  vid.muted = muted;
+  iconSound.style.display = muted ? 'none'  : '';
+  iconMute.style.display  = muted ? ''      : 'none';
+});
+
+// ============================================================
+// STARTUP
+// ============================================================
+function revealUI() {
+  chromeTop.classList.add('visible');
+  progWrap.classList.add('visible');
+  timestamp.classList.add('visible');
+}
+
+vid.addEventListener('loadedmetadata', () => {
+  resize();
+
+  // Cinematic bars
+  if (!RM) {
+    const barH = Math.round(VH * 0.095) + 'px';
+    barT.style.height = barH;
+    barB.style.height = barH;
+  }
+
+  // Fade in from black
+  setTimeout(() => { entryFade.style.opacity = '0'; }, 200);
+
+  // Auto-play
+  vid.muted = true; // start muted to allow autoplay
+  setTimeout(async () => {
+    try {
+      await vid.play();
+      started = true;
+      setTimeout(() => {
+        vid.muted = false; muted = false;
+        iconSound.style.display = ''; iconMute.style.display = 'none';
+      }, 400);
+      revealUI();
+      setTimeout(fireBurst, 800);
+    } catch(e) {
+      started = true;
+      showPlay(true);
+      revealUI();
+    }
+  }, 800);
+});
+
+window.addEventListener('resize', resize);
+
+// Start RAF
+render();
+
+})();
+</script>
+</body>
+</html>
