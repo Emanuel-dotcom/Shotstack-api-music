@@ -1,0 +1,26 @@
+{
+  "name": "shotstack-api-music",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.jsx",
+  "scripts": {
+    "start": "npx remotion studio src/index.jsx",
+    "render": "npx remotion render src/index.jsx BusinessVideo out/business-video.mp4",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:35783/git/Emanuel-dotcom/Shotstack-api-music"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@remotion/bundler": "^4.0.481",
+    "@remotion/cli": "^4.0.481",
+    "@remotion/renderer": "^4.0.481",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "remotion": "^4.0.481"
+  }
+}
