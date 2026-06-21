@@ -262,7 +262,7 @@ export function BusinessVideo() {
 
   return (
     <AbsoluteFill style={{ background: "#000", overflow: "hidden", opacity: introOpacity }}>
-      <Audio src={staticFile("music.mp3")} volume={0.7} />
+      <Audio src={staticFile("music.mp3")} volume={1} />
 
       {/* ── Photo ── */}
       <AbsoluteFill style={{ transform: `translate(${sx}px, ${sy}px)`, overflow: "hidden" }}>
