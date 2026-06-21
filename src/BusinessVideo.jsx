@@ -11,114 +11,118 @@ import {
   random,
 } from "remotion";
 
-// ─── Constants ───────────────────────────────────────────────
-const PHOTO = staticFile("photos/photo7.jpg");
-const FPS = 30;
-// 120 BPM → beat every 15 frames
-const BEATS = Array.from({ length: 22 }, (_, i) => i * 15);
-
-// Text slams: { frame, text, size, color, dir: "left"|"right"|"top"|"bottom" }
-const TEXTS = [
-  { frame: 0,   text: "BUSINESS",  size: 110, color: "#FFD700", dir: "bottom" },
-  { frame: 60,  text: "MINDSET",   size: 72,  color: "#ffffff", dir: "left"   },
-  { frame: 90,  text: "GRIND",     size: 96,  color: "#FFD700", dir: "right"  },
-  { frame: 120, text: "HUSTLE",    size: 80,  color: "#ffffff", dir: "left"   },
-  { frame: 150, text: "VISION",    size: 96,  color: "#FFD700", dir: "bottom" },
-  { frame: 195, text: "EMPIRE",    size: 110, color: "#ffffff", dir: "top"    },
-  { frame: 240, text: "NO DAYS",   size: 68,  color: "#FFD700", dir: "left"   },
-  { frame: 255, text: "OFF",       size: 96,  color: "#ffffff", dir: "right"  },
-  { frame: 270, text: "BUSINESS",  size: 120, color: "#FFD700", dir: "bottom" },
+// ─── Font pool — 40 fonts, covers serif/sans/mono/display/handwriting ─────
+const FONTS = [
+  "Impact",
+  "Arial Black",
+  "'Times New Roman', serif",
+  "'Courier New', monospace",
+  "Georgia, serif",
+  "Verdana, sans-serif",
+  "Trebuchet MS, sans-serif",
+  "Palatino Linotype, serif",
+  "'Comic Sans MS', cursive",
+  "Tahoma, sans-serif",
+  "'Lucida Console', monospace",
+  "'Book Antiqua', serif",
+  "Garamond, serif",
+  "Franklin Gothic Medium, sans-serif",
+  "Century Gothic, sans-serif",
+  "'Arial Narrow', sans-serif",
+  "'MS Gothic', sans-serif",
+  "Copperplate, fantasy",
+  "Papyrus, fantasy",
+  "'Segoe UI', sans-serif",
+  "'Helvetica Neue', sans-serif",
+  "Futura, sans-serif",
+  "Rockwell, serif",
+  "'Gill Sans', sans-serif",
+  "Optima, sans-serif",
+  "Didot, serif",
+  "'Bodoni MT', serif",
+  "Cambria, serif",
+  "Calibri, sans-serif",
+  "'Avant Garde', sans-serif",
+  "Baskerville, serif",
+  "'Brush Script MT', cursive",
+  "'Lucida Handwriting', cursive",
+  "Perpetua, serif",
+  "Consolas, monospace",
+  "'Monaco', monospace",
+  "'Andale Mono', monospace",
+  "Charcoal, sans-serif",
+  "Geneva, sans-serif",
+  "'Copperplate Gothic Bold', fantasy",
 ];
 
-// ─── Utilities ────────────────────────────────────────────────
+// Color pool cycling
+const COLORS = [
+  "#FFD700", "#ffffff", "#FF4444", "#00FF88",
+  "#FF6B00", "#00D4FF", "#FF00FF", "#FFFF00",
+  "#FF8C00", "#E0E0E0", "#FF3366", "#39FF14",
+];
+
+// Letter spacing pool
+const SPACINGS = [2, 4, 8, 12, 16, 20, -2, 0, 24, 6];
+
+// Font weight pool
+const WEIGHTS = [100, 300, 400, 700, 800, 900];
+
+// Text size variation
+const SIZES = [80, 90, 100, 110, 120, 130, 140, 90, 75, 105];
+
+// Words that flash through
+const WORDS = [
+  "BUSINESS", "GRIND", "HUSTLE", "MONEY", "VISION",
+  "EMPIRE", "MINDSET", "WIN", "RICH", "FOCUS",
+  "POWER", "SUCCESS", "GOALS", "ALPHA", "SIGMA",
+  "BUSINESS", "BUILD", "RISE", "NO STOP", "BUSINESS",
+];
+
+// ─── shake util ──────────────────────────────────────────────
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-
-function nearestBeatDist(frame) {
-  return Math.min(...BEATS.map((b) => Math.abs(frame - b)));
+function shake(frame, active, str = 1) {
+  if (!active) return { x: 0, y: 0 };
+  const s = Math.floor(frame / 2);
+  return { x: (random(`sx${s}`) - 0.5) * 30 * str, y: (random(`sy${s}`) - 0.5) * 30 * str };
 }
 
-function useShake(frame, active) {
-  if (!active)  return { x: 0, y: 0 };
-  const slot = Math.floor(frame / 2);
-  return {
-    x: (random(`sx${slot}`) - 0.5) * 28,
-    y: (random(`sy${slot}`) - 0.5) * 28,
-  };
+// ─── Flash ───────────────────────────────────────────────────
+function Flash({ frame, beats }) {
+  const dist = Math.min(...beats.map((b) => Math.abs(frame - b)));
+  const opacity = clamp(interpolate(dist, [0, 4], [1, 0], { extrapolateRight: "clamp" }), 0, 1);
+  if (opacity < 0.01) return null;
+  return <AbsoluteFill style={{ background: "#fff", opacity, pointerEvents: "none", zIndex: 20 }} />;
 }
 
-// ─── White Flash ──────────────────────────────────────────────
-function Flash({ frame }) {
-  const dist = nearestBeatDist(frame);
-  const opacity = interpolate(dist, [0, 5], [0.85, 0], { extrapolateRight: "clamp" });
-  if (opacity <= 0) return null;
-  return (
-    <AbsoluteFill style={{ background: "#fff", opacity, pointerEvents: "none" }} />
-  );
-}
+// ─── The main rapid-font text ─────────────────────────────────
+function RapidText({ frame }) {
+  // Every 1 frame = new font, color, spacing, weight, size
+  const fontIdx   = Math.floor(random(`f${frame}`) * FONTS.length);
+  const colorIdx  = Math.floor(random(`c${frame}`) * COLORS.length);
+  const spacingIdx= Math.floor(random(`s${frame}`) * SPACINGS.length);
+  const weightIdx = Math.floor(random(`w${frame}`) * WEIGHTS.length);
+  const sizeIdx   = Math.floor(random(`sz${frame}`) * SIZES.length);
 
-// ─── Vignette ────────────────────────────────────────────────
-function Vignette() {
-  return (
-    <AbsoluteFill
-      style={{
-        background:
-          "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%)",
-        pointerEvents: "none",
-      }}
-    />
-  );
-}
+  // Word changes every 8-15 frames
+  const wordSlot  = Math.floor(frame / 8) % WORDS.length;
+  const word      = WORDS[wordSlot];
 
-// ─── Grain ───────────────────────────────────────────────────
-function Grain({ frame }) {
-  const seed = Math.floor(frame / 3);
-  return (
-    <AbsoluteFill
-      style={{
-        opacity: 0.06,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' seed='${seed}'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-        backgroundRepeat: "repeat",
-        pointerEvents: "none",
-      }}
-    />
-  );
-}
+  // Slight random position jitter every 3 frames
+  const jSlot = Math.floor(frame / 3);
+  const jx = (random(`jx${jSlot}`) - 0.5) * 40;
+  const jy = (random(`jy${jSlot}`) - 0.5) * 40;
 
-// ─── Gold Bars ───────────────────────────────────────────────
-function GoldBars() {
-  return (
-    <>
-      <div style={{ position:"absolute", top:0, left:0, right:0, height:6,
-        background:"linear-gradient(90deg,#FFD700,#FFA500,#FFD700)", zIndex:10 }} />
-      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:6,
-        background:"linear-gradient(90deg,#FFD700,#FFA500,#FFD700)", zIndex:10 }} />
-    </>
-  );
-}
+  // Random rotation every 5 frames (small tilt)
+  const rSlot = Math.floor(frame / 5);
+  const rot   = (random(`rot${rSlot}`) - 0.5) * 8;
 
-// ─── Text Slam ────────────────────────────────────────────────
-function TextSlam({ frame, fps, item }) {
-  const localF = frame - item.frame;
-  if (localF < 0) return null;
+  // Italic randomly
+  const italic = random(`it${frame}`) > 0.65 ? "italic" : "normal";
 
-  const duration = item.duration ?? 20;
-  if (localF > duration + 6) return null;
-
-  const enter = spring({ frame: localF, fps, config: { damping: 9, stiffness: 240, mass: 0.7 } });
-  const exitT = clamp((localF - duration) / 6, 0, 1);
-  const exitOpacity = 1 - exitT;
-
-  // Entry direction
-  const DIST = 300;
-  const offsets = {
-    left:   { x: interpolate(enter, [0,1], [-DIST, 0]), y: 0 },
-    right:  { x: interpolate(enter, [0,1], [DIST, 0]),  y: 0 },
-    top:    { x: 0, y: interpolate(enter, [0,1], [-DIST, 0]) },
-    bottom: { x: 0, y: interpolate(enter, [0,1], [DIST, 0])  },
-  };
-  const { x, y } = offsets[item.dir] ?? offsets.bottom;
-
-  const scale = interpolate(enter, [0, 0.6, 1], [1.4, 0.95, 1]);
+  // Text shadow color also cycles
+  const shadowColorIdx = Math.floor(random(`sh${frame}`) * COLORS.length);
+  const shadowColor = COLORS[shadowColorIdx];
 
   return (
     <AbsoluteFill
@@ -127,194 +131,181 @@ function TextSlam({ frame, fps, item }) {
         alignItems: "center",
         justifyContent: "center",
         pointerEvents: "none",
-        zIndex: 8,
+        zIndex: 15,
       }}
     >
       <div
         style={{
-          fontFamily: "'Arial Black', Arial, sans-serif",
-          fontSize: item.size,
-          fontWeight: 900,
-          letterSpacing: item.size > 90 ? 6 : 10,
-          color: item.color,
+          fontFamily: FONTS[fontIdx],
+          fontSize: SIZES[sizeIdx],
+          fontWeight: WEIGHTS[weightIdx],
+          fontStyle: italic,
+          letterSpacing: SPACINGS[spacingIdx],
+          color: COLORS[colorIdx],
           textTransform: "uppercase",
-          transform: `translate(${x}px, ${y}px) scale(${scale})`,
-          opacity: exitOpacity,
-          textShadow:
-            item.color === "#FFD700"
-              ? "0 0 40px rgba(255,215,0,0.7), 0 4px 0 rgba(0,0,0,0.9)"
-              : "0 4px 0 rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.7)",
-          WebkitTextStroke: "2px rgba(0,0,0,0.5)",
+          transform: `translate(${jx}px, ${jy}px) rotate(${rot}deg)`,
+          textShadow: `0 0 30px ${shadowColor}, 0 4px 0 rgba(0,0,0,0.8), 0 0 60px rgba(0,0,0,0.5)`,
+          WebkitTextStroke: `${random(`str${frame}`) > 0.5 ? 2 : 0}px rgba(0,0,0,0.6)`,
+          userSelect: "none",
+          whiteSpace: "nowrap",
         }}
       >
-        {item.text}
+        {word}
       </div>
     </AbsoluteFill>
   );
 }
 
-// ─── Main Composition ─────────────────────────────────────────
+// ─── Static bold stamp (freezes for 1 sec at end) ────────────
+function FinalStamp({ frame, startFrame }) {
+  const localF = frame - startFrame;
+  const progress = spring({ frame: localF, fps: 30, config: { damping: 8, stiffness: 300, mass: 0.6 } });
+  const scale = interpolate(progress, [0, 1], [3, 1]);
+  const opacity = clamp(localF / 6, 0, 1);
+
+  return (
+    <AbsoluteFill
+      style={{
+        background: "rgba(0,0,0,0.85)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 16,
+        zIndex: 25,
+        opacity,
+      }}
+    >
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:6,
+        background:"linear-gradient(90deg,#FFD700,#FFA500,#FFD700)" }} />
+
+      <div style={{
+        transform: `scale(${scale})`,
+        fontFamily: "Impact, 'Arial Black', sans-serif",
+        fontSize: 130,
+        fontWeight: 900,
+        color: "#FFD700",
+        letterSpacing: 8,
+        textShadow: "0 0 60px rgba(255,215,0,0.8), 0 6px 0 rgba(0,0,0,1)",
+        WebkitTextStroke: "3px rgba(0,0,0,0.5)",
+      }}>
+        BUSINESS
+      </div>
+
+      <div style={{
+        fontFamily: "Verdana, sans-serif",
+        fontSize: 26,
+        fontWeight: 700,
+        letterSpacing: 12,
+        color: "rgba(255,255,255,0.8)",
+        textTransform: "uppercase",
+      }}>
+        IT'S A LIFESTYLE
+      </div>
+
+      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:6,
+        background:"linear-gradient(90deg,#FFD700,#FFA500,#FFD700)" }} />
+    </AbsoluteFill>
+  );
+}
+
+// ─── Root composition ─────────────────────────────────────────
 export function BusinessVideo() {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
-  // ── Zoom logic ────────────────────────────────────────────
-  // Base scale: dramatic intro (3.0 → 1.0 over first 20 frames)
-  const introScale = interpolate(frame, [0, 20], [3.0, 1.0], { extrapolateRight: "clamp" });
+  // 300 frames total (10s)
+  // Beats at 120 BPM → every 15 frames
+  const BEATS = Array.from({ length: 22 }, (_, i) => i * 15);
 
-  // Zoom pulse: at each beat, spike to +0.12 then decay
-  let beatScale = 0;
-  for (const beat of BEATS) {
-    const d = frame - beat;
-    if (d >= 0 && d < 12) {
-      const pulse = interpolate(d, [0, 3, 12], [0, 0.12, 0]);
-      beatScale = Math.max(beatScale, pulse);
-    }
+  // Photo scale: zoom pulse on every beat
+  let beatPulse = 0;
+  for (const b of BEATS) {
+    const d = frame - b;
+    if (d >= 0 && d < 10) beatPulse = Math.max(beatPulse, interpolate(d, [0, 2, 10], [0.14, 0.14, 0], {}));
   }
 
-  // Dramatic zoom sections
-  const zoomIn1  = interpolate(frame, [120, 165], [1, 1.6], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const zoomOut1 = interpolate(frame, [165, 195], [1.6, 1.0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const zoomIn2  = interpolate(frame, [210, 255], [1.0, 1.8], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const zoomOut2 = interpolate(frame, [255, 285], [1.8, 1.0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Dramatic zoom in and out
+  const zoomPhase =
+    frame < 20  ? interpolate(frame, [0, 20], [2.5, 1.0], { extrapolateRight: "clamp" }) :
+    frame < 150 ? 1.0 :
+    frame < 200 ? interpolate(frame, [150, 200], [1.0, 1.7], { extrapolateRight: "clamp" }) :
+    frame < 230 ? interpolate(frame, [200, 230], [1.7, 1.0], { extrapolateRight: "clamp" }) :
+    1.0;
 
-  const dramaticScale =
-    frame < 120 ? 1 :
-    frame < 165 ? zoomIn1 :
-    frame < 195 ? zoomOut1 :
-    frame < 210 ? 1 :
-    frame < 255 ? zoomIn2 :
-    zoomOut2;
+  const photoScale = zoomPhase * (1 + beatPulse);
 
-  const finalScale = (frame < 20 ? introScale : 1.0) * dramaticScale * (1 + beatScale);
+  // Screen shake
+  const shakeActive = (frame >= 30 && frame < 80) || (frame >= 160 && frame < 230) || (frame >= 255 && frame < 285);
+  const { x: sx, y: sy } = shake(frame, shakeActive, 1.2);
 
-  // ── Shake ─────────────────────────────────────────────────
-  const shakeActive =
-    (frame >= 30 && frame < 60) ||
-    (frame >= 105 && frame < 135) ||
-    (frame >= 165 && frame < 195) ||
-    (frame >= 255 && frame < 285);
-  const { x: shakeX, y: shakeY } = useShake(frame, shakeActive);
+  // Color grade: contrast + saturation pulses at beats
+  const dist = Math.min(...BEATS.map((b) => Math.abs(frame - b)));
+  const contrast = clamp(interpolate(dist, [0, 6], [1.7, 1.25], { extrapolateRight: "clamp" }), 1, 2);
 
-  // ── B&W flicker ───────────────────────────────────────────
-  const bwMoments = [[60, 90], [165, 180]];
-  const isInBW = bwMoments.some(([s, e]) => frame >= s && frame < e);
-  // Flicker within B&W moments
-  const flickerSlot = Math.floor(frame / 4);
-  const isBW = isInBW && random(`bw${flickerSlot}`) > 0.35;
+  // B&W flicker windows
+  const bwWindows = [[45, 75], [150, 180], [240, 260]];
+  const inBW = bwWindows.some(([s, e]) => frame >= s && frame < e);
+  const flickerSlot = Math.floor(frame / 3);
+  const isBW = inBW && random(`bw${flickerSlot}`) > 0.3;
 
-  // ── Contrast boost at beat hits ───────────────────────────
-  const beatDist = nearestBeatDist(frame);
-  const contrastBoost = interpolate(beatDist, [0, 6], [1.6, 1.25], { extrapolateRight: "clamp" });
+  const photoFilter = `contrast(${contrast}) brightness(1.1) saturate(${isBW ? 0 : 1.4})`;
 
-  const photoFilter = [
-    `contrast(${contrastBoost})`,
-    `brightness(1.1)`,
-    `saturate(${isBW ? 0 : 1.3})`,
-  ].join(" ");
+  // Chromatic aberration on beat
+  const aber = clamp(interpolate(dist, [0, 5], [8, 0], { extrapolateRight: "clamp" }), 0, 12);
 
-  // ── Chromatic aberration (offset clone) ───────────────────
-  const aberration = clamp(interpolate(beatDist, [0, 5], [6, 0], { extrapolateRight: "clamp" }), 0, 10);
+  // Final stamp starts at frame 270
+  const showStamp = frame >= 270;
 
-  // ── Intro opacity ─────────────────────────────────────────
-  const introOpacity = interpolate(frame, [0, 3], [0, 1], { extrapolateRight: "clamp" });
+  // Intro fade
+  const introOpacity = clamp(frame / 4, 0, 1);
 
   return (
     <AbsoluteFill style={{ background: "#000", overflow: "hidden", opacity: introOpacity }}>
       <Audio src={staticFile("music.mp3")} volume={0.7} />
 
-      {/* ── Photo layer with all transforms ── */}
-      <AbsoluteFill
-        style={{
-          transform: `translate(${shakeX}px, ${shakeY}px)`,
-          overflow: "hidden",
-        }}
-      >
-        {/* Chromatic aberration: red channel shifted */}
-        {aberration > 0.5 && (
-          <AbsoluteFill style={{ mixBlendMode: "screen", opacity: 0.35 }}>
-            <Img
-              src={PHOTO}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "center top",
-                transform: `scale(${finalScale}) translateX(${aberration}px)`,
-                filter: "saturate(0) sepia(1) hue-rotate(-20deg) brightness(1.5)",
-              }}
-            />
+      {/* ── Photo ── */}
+      <AbsoluteFill style={{ transform: `translate(${sx}px, ${sy}px)`, overflow: "hidden" }}>
+        {/* Chromatic aberration clone */}
+        {aber > 1 && (
+          <AbsoluteFill style={{ mixBlendMode: "screen", opacity: 0.3 }}>
+            <Img src={staticFile("photos/photo7.jpg")}
+              style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center top",
+                transform:`scale(${photoScale}) translateX(${aber}px)`,
+                filter:"saturate(0) sepia(1) hue-rotate(-30deg) brightness(2)" }} />
           </AbsoluteFill>
         )}
 
         {/* Main photo */}
-        <AbsoluteFill>
-          <Img
-            src={PHOTO}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center top",
-              transform: `scale(${finalScale})`,
-              filter: photoFilter,
-            }}
-          />
-        </AbsoluteFill>
+        <Img src={staticFile("photos/photo7.jpg")}
+          style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center top",
+            transform:`scale(${photoScale})`, filter: photoFilter }} />
 
-        {/* Dark cinematic gradient */}
-        <AbsoluteFill
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%, transparent 60%, rgba(0,0,0,0.8) 100%)",
-            pointerEvents: "none",
-          }}
-        />
+        {/* Cinematic gradient */}
+        <AbsoluteFill style={{
+          background:"linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 55%, rgba(0,0,0,0.85) 100%)",
+          pointerEvents:"none" }} />
       </AbsoluteFill>
 
       {/* ── Vignette ── */}
-      <Vignette />
+      <AbsoluteFill style={{
+        background:"radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.8) 100%)",
+        pointerEvents:"none", zIndex:5 }} />
 
-      {/* ── Grain ── */}
-      <Grain frame={frame} />
+      {/* ── Rapid font text (shown while not in final stamp) ── */}
+      {!showStamp && <RapidText frame={frame} />}
 
       {/* ── Beat flashes ── */}
-      <Flash frame={frame} />
+      <Flash frame={frame} beats={BEATS} />
 
-      {/* ── Text slams ── */}
-      {TEXTS.map((item, i) => (
-        <TextSlam key={i} frame={frame} fps={fps} item={item} />
-      ))}
-
-      {/* ── Persistent BUSINESS watermark (top) ── */}
-      <AbsoluteFill
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          paddingTop: 60,
-          pointerEvents: "none",
-          zIndex: 7,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Arial Black', Arial, sans-serif",
-            fontSize: 36,
-            fontWeight: 900,
-            letterSpacing: 10,
-            color: "rgba(255,215,0,0.9)",
-            textTransform: "uppercase",
-            textShadow: "0 2px 20px rgba(0,0,0,0.9)",
-            opacity: interpolate(frame, [5, 15], [0, 1], { extrapolateRight: "clamp" }),
-          }}
-        >
-          BUSINESS
-        </div>
-      </AbsoluteFill>
+      {/* ── Final stamp ── */}
+      {showStamp && <FinalStamp frame={frame} startFrame={270} />}
 
       {/* ── Gold bars ── */}
-      <GoldBars />
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:5,
+        background:"linear-gradient(90deg,#FFD700,#FFA500,#FFD700)", zIndex:30 }} />
+      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:5,
+        background:"linear-gradient(90deg,#FFD700,#FFA500,#FFD700)", zIndex:30 }} />
     </AbsoluteFill>
   );
 }
