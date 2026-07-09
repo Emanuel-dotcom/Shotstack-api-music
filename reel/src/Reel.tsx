@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   AbsoluteFill,
-  Audio,
   OffthreadVideo,
   Sequence,
   interpolate,
@@ -177,19 +176,36 @@ const Captions: React.FC = () => {
           lineHeight: 1.05,
         }}
       >
-        {active.words.map((w, i) => (
-          <span
-            key={i}
-            style={{
-              color: w.accent ? PINK : 'white',
-              WebkitTextStroke: '10px black',
-              paintOrder: 'stroke fill',
-              textShadow: '0 8px 24px rgba(0,0,0,0.55)',
-            }}
-          >
-            {w.text}
-          </span>
-        ))}
+        {active.words.map((w, i) =>
+          w.accent ? (
+            <span
+              key={i}
+              style={{
+                color: 'white',
+                background: `linear-gradient(135deg, ${PINK_DEEP}, ${PINK})`,
+                borderRadius: 22,
+                padding: '2px 26px',
+                transform: 'rotate(-2deg)',
+                boxShadow: '0 10px 30px rgba(230,0,143,0.55), inset 0 -6px 0 rgba(0,0,0,0.18)',
+                textShadow: '0 4px 10px rgba(0,0,0,0.35)',
+              }}
+            >
+              {w.text}
+            </span>
+          ) : (
+            <span
+              key={i}
+              style={{
+                color: 'white',
+                WebkitTextStroke: '10px black',
+                paintOrder: 'stroke fill',
+                textShadow: '0 8px 24px rgba(0,0,0,0.55)',
+              }}
+            >
+              {w.text}
+            </span>
+          )
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -254,6 +270,85 @@ const Hook: React.FC = () => {
   );
 };
 
+// Animated pink/blue light leaks in the corners — modern reel look.
+const LightLeaks: React.FC = () => {
+  const frame = useCurrentFrame();
+  const x = Math.sin(frame / 40) * 120;
+  const y = Math.cos(frame / 52) * 90;
+  const pulse = 0.16 + Math.sin(frame / 22) * 0.05;
+  return (
+    <AbsoluteFill style={{pointerEvents: 'none'}}>
+      <div
+        style={{
+          position: 'absolute',
+          width: 900,
+          height: 900,
+          left: -380 + x,
+          top: -320 + y,
+          background: 'radial-gradient(circle, rgba(255,47,178,0.9) 0%, rgba(255,47,178,0) 62%)',
+          opacity: pulse,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          width: 1000,
+          height: 1000,
+          right: -420 - x,
+          bottom: -380 - y,
+          background: 'radial-gradient(circle, rgba(80,120,255,0.9) 0%, rgba(80,120,255,0) 62%)',
+          opacity: pulse * 0.9,
+        }}
+      />
+    </AbsoluteFill>
+  );
+};
+
+const GRAIN_URI =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/></filter><rect width="220" height="220" filter="url(#n)" opacity="0.5"/></svg>`
+  );
+
+const Grain: React.FC = () => {
+  const frame = useCurrentFrame();
+  const ox = (frame * 37) % 220;
+  const oy = (frame * 61) % 220;
+  return (
+    <AbsoluteFill
+      style={{
+        pointerEvents: 'none',
+        backgroundImage: `url("${GRAIN_URI}")`,
+        backgroundPosition: `${ox}px ${oy}px`,
+        opacity: 0.05,
+      }}
+    />
+  );
+};
+
+// Thin pink progress bar at the top.
+const ProgressBar: React.FC = () => {
+  const frame = useCurrentFrame();
+  const total = totalFrames();
+  const w = interpolate(frame, [0, total], [0, 100], {
+    extrapolateRight: 'clamp',
+  });
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        height: 14,
+        width: `${w}%`,
+        background: `linear-gradient(90deg, ${PINK_DEEP}, ${PINK}, #ff8ed6)`,
+        borderRadius: '0 7px 7px 0',
+        boxShadow: `0 0 24px rgba(255,47,178,0.9)`,
+      }}
+    />
+  );
+};
+
 export const Reel: React.FC = () => {
   const frame = useCurrentFrame();
   const total = totalFrames();
@@ -276,14 +371,11 @@ export const Reel: React.FC = () => {
           background: 'radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0) 58%, rgba(0,0,0,0.34) 100%)',
         }}
       />
+      <LightLeaks />
+      <Grain />
       <Captions />
       <Hook />
-      <Audio src={staticFile('music.mp3')} volume={(f) =>
-        interpolate(f, [0, 20, total - 30, total], [0, 0.07, 0.07, 0], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-        })
-      } />
+      <ProgressBar />
       <AbsoluteFill style={{backgroundColor: 'black', opacity: 1 - fadeOut, pointerEvents: 'none'}} />
     </AbsoluteFill>
   );
