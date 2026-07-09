@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>AceVision — Analiză AI pentru tenis</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    --bg: #0b1220; --panel: #121c2e; --panel2: #1a2740;
+    --text: #e7eef7; --muted: #93a4b8; --accent: #4ade80;
+    --yellow: #facc15; --red: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    display: flex; flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header {
+    padding: 12px 16px 8px; display: flex; align-items: center; gap: 10px;
+  }
+  header img { width: 34px; height: 34px; }
+  header h1 { font-size: 19px; font-weight: 700; }
+  header h1 span { color: var(--accent); }
+  header small { color: var(--muted); display: block; font-size: 11px; font-weight: 400; }
+
+  main { flex: 1; overflow-y: auto; padding: 0 12px 84px; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* --- player video + overlay --- */
+  .videoWrap {
+    position: relative; width: 100%; border-radius: 14px; overflow: hidden;
+    background: #000; aspect-ratio: 16/9;
+  }
+  .videoWrap video, .videoWrap canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  }
+  #overlay { z-index: 2; }
+  #overlay.calibrating { cursor: crosshair; outline: 3px solid var(--yellow); outline-offset: -3px; }
+  #shotBadge {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%) scale(.8);
+    z-index: 3; padding: 6px 18px; border-radius: 999px; color: #0b1220;
+    font-weight: 800; font-size: 16px; opacity: 0; transition: all .25s;
+    pointer-events: none;
+  }
+  #shotBadge.show { opacity: 1; transform: translateX(-50%) scale(1); }
+
+  /* --- butoane & controale --- */
+  .row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  button, .fileBtn {
+    flex: 1; min-width: 130px; border: 0; border-radius: 12px; padding: 13px 14px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    background: var(--accent); color: #06220f;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  button.secondary, .fileBtn { background: var(--panel2); color: var(--text); }
+  button.stop { background: var(--red); color: #2b0808; }
+  button.danger { background: transparent; color: var(--red); flex: 0; min-width: 44px; }
+  button:disabled { opacity: .5; }
+  input[type=file] { display: none; }
+
+  #status {
+    margin-top: 12px; padding: 12px 14px; border-radius: 12px;
+    background: var(--panel); color: var(--muted); font-size: 14px; line-height: 1.45;
+  }
+  #status.error { color: var(--red); }
+
+  h2 { font-size: 17px; margin: 18px 0 8px; }
+  h3 { font-size: 14px; margin: 18px 0 8px; color: var(--muted); font-weight: 600; }
+  .muted { color: var(--muted); font-size: 13px; }
+  p.muted { padding: 20px 4px; }
+
+  /* --- statistici --- */
+  .statgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .stat {
+    background: var(--panel); border-radius: 12px; padding: 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat b { font-size: 22px; color: var(--accent); }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .chart { width: 100%; height: 170px; background: var(--panel); border-radius: 12px; }
+  .courtmap { width: 100%; height: 380px; background: var(--panel); border-radius: 12px; }
+  .drillResult { margin-top: 12px; padding: 12px; background: var(--panel); border-radius: 12px; font-size: 14px; }
+
+  /* --- highlights & istoric --- */
+  .highlights { display: flex; flex-direction: column; gap: 8px; }
+  .hl, .histCard {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel); border-radius: 12px; padding: 8px 10px;
+  }
+  .hl img { width: 74px; border-radius: 8px; }
+  .noThumb { width: 74px; text-align: center; font-size: 26px; }
+  .hlInfo, .histCard > div:first-child { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+  .hlBtns { display: flex; gap: 6px; }
+  .hlBtns button { flex: 0; min-width: 42px; padding: 9px 10px; font-size: 14px; background: var(--panel2); color: var(--text); }
+  .histCard { margin-top: 8px; }
+  .histCard button { flex: 0; min-width: auto; padding: 9px 14px; font-size: 13px; background: var(--panel2); color: var(--text); }
+
+  /* --- setări --- */
+  .setting {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--panel); border-radius: 12px; padding: 13px 14px; margin-top: 8px;
+  }
+  .setting label { font-size: 14px; flex: 1; }
+  .setting small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .setting select { background: var(--panel2); color: var(--text); border: 0; border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+  .setting input[type=range] { width: 130px; accent-color: var(--accent); }
+  .setting input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); }
+
+  /* --- ghid --- */
+  details { background: var(--panel); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
+  details summary { font-weight: 700; font-size: 14px; cursor: pointer; }
+  details p, details li { font-size: 13.5px; color: var(--muted); line-height: 1.55; margin-top: 8px; }
+  details ol { padding-left: 18px; }
+
+  /* --- bara de tab-uri --- */
+  .tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+    display: flex; background: var(--panel);
+    border-top: 1px solid #223048;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabbar button {
+    flex: 1; min-width: 0; background: none; color: var(--muted);
+    border-radius: 0; padding: 9px 2px 10px; font-size: 10.5px; font-weight: 600;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .tabbar button .ico { font-size: 20px; }
+  .tabbar button.active { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="icon.svg" alt="">
+  <h1>Ace<span>Vision</span><small>Analiză AI pentru tenis — direct pe telefonul tău</small></h1>
+</header>
+
+<main>
+  <!-- ============ ANALIZĂ ============ -->
+  <section class="tab active" id="tab-analyze">
+    <div class="videoWrap">
+      <video id="video" playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div id="shotBadge"></div>
+    </div>
+
+    <div class="row">
+      <label class="fileBtn">🎞 Încarcă video<input type="file" id="fileInput" accept="video/*"></label>
+      <button class="secondary" id="btnCamera">📹 Cameră live</button>
+    </div>
+
+    <div id="analyzeControls" hidden>
+      <div class="row">
+        <button class="secondary" id="btnCalibrate">📐 Calibrează terenul</button>
+        <button id="btnStart">▶ Începe analiza</button>
+      </div>
+    </div>
+
+    <div id="status">Încarcă un video cu un meci/antrenament sau pornește camera. Pentru rezultate bune, filmează din spatele terenului, de sus (ca la TV), cu tot terenul în cadru.</div>
+
+    <details>
+      <summary>📖 Cum obții cele mai bune rezultate</summary>
+      <ol>
+        <li><b>Poziția camerei:</b> în spatele liniei de fund, ridicată (2–3 m dacă poți — un trepied pe gard e ideal), cu tot terenul în cadru. Telefonul în modul peisaj (landscape).</li>
+        <li><b>Calibrarea:</b> apasă „Calibrează terenul" și atinge cele 4 colțuri ale terenului de dublu, în ordinea cerută. Fără calibrare primești lovituri + viteze de swing, dar nu arbitraj IN/OUT, harta bounce-urilor sau viteza mingii.</li>
+        <li><b>Lumina:</b> evită filmarea contra soarelui; mingea trebuie să fie vizibilă (contrast bun cu fundalul).</li>
+        <li><b>Mâna dominantă:</b> setează-o în Setări, altfel forehand/backhand pot fi inversate.</li>
+        <li>Pe telefoane mai lente, activează „Analiză rapidă" din Setări.</li>
+      </ol>
+    </details>
+  </section>
+
+  <!-- ============ REZULTATE ============ -->
+  <section class="tab" id="tab-results">
+    <h2>Rezultatele sesiunii</h2>
+    <div id="resultsBody"></div>
+  </section>
+
+  <!-- ============ ANTRENAMENT ============ -->
+  <section class="tab" id="tab-drills">
+    <h2>Antrenament ghidat</h2>
+    <p class="muted" style="padding: 4px;">Alege un exercițiu, calibrează terenul și pornește analiza. Aplicația numără mingile care ating zona țintă și îți dă feedback vocal după fiecare minge — ca un antrenor.</p>
+    <canvas id="drillPreview" class="courtmap" style="height:300px"></canvas>
+    <div id="drillStatus" class="muted" style="padding:8px 4px;">Niciun drill activ.</div>
+    <div id="drillList"></div>
+  </section>
+
+  <!-- ============ ISTORIC ============ -->
+  <section class="tab" id="tab-history">
+    <h2>Istoric & progres</h2>
+    <div id="historyBody"></div>
+  </section>
+
+  <!-- ============ SETĂRI ============ -->
+  <section class="tab" id="tab-settings">
+    <h2>Setări</h2>
+    <div class="setting">
+      <label>Mâna dominantă<small>Pentru clasificarea forehand / backhand</small></label>
+      <select id="setHanded"><option value="right">Dreapta</option><option value="left">Stânga</option></select>
+    </div>
+    <div class="setting">
+      <label>Unități de viteză</label>
+      <select id="setUnits"><option value="kmh">km/h</option><option value="mph">mph</option></select>
+    </div>
+    <div class="setting">
+      <label>Arbitraj linii<small>Terenul de simplu sau de dublu</small></label>
+      <select id="setLineMode"><option value="singles">Simplu</option><option value="doubles">Dublu</option></select>
+    </div>
+    <div class="setting">
+      <label>Feedback vocal<small>Anunță loviturile, „aut" și țintele, în română</small></label>
+      <input type="checkbox" id="setVoice">
+    </div>
+    <div class="setting">
+      <label>Analiză rapidă<small>Pentru telefoane mai lente — detectează corpul mai rar</small></label>
+      <input type="checkbox" id="setFast">
+    </div>
+    <div class="setting">
+      <label>Sensibilitate detectare minge</label>
+      <input type="range" id="setBallSens" min="0.5" max="2" step="0.1">
+    </div>
+    <div class="setting">
+      <label>Sensibilitate detectare lovituri</label>
+      <input type="range" id="setSwingSens" min="0.5" max="2" step="0.1">
+    </div>
+
+    <details>
+      <summary>ℹ️ Despre AceVision</summary>
+      <p>AceVision rulează 100% pe telefonul tău — niciun video nu părăsește dispozitivul. Folosește modelul MediaPipe Pose (Google) pentru detectarea corpului și algoritmi proprii de urmărire a mingii și de geometrie a terenului.</p>
+      <p>Instalare pe telefon: deschide pagina în Chrome/Safari → meniul browserului → „Adaugă la ecranul principal". După prima încărcare funcționează și offline.</p>
+      <p>Datele (sesiuni, setări) se salvează local în browser. Exportă CSV dacă vrei backup.</p>
+    </details>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button data-tab="analyze" class="active"><span class="ico">🎾</span>Analiză</button>
+  <button data-tab="results"><span class="ico">📊</span>Rezultate</button>
+  <button data-tab="drills"><span class="ico">🎯</span>Antrenament</button>
+  <button data-tab="history"><span class="ico">📅</span>Istoric</button>
+  <button data-tab="settings"><span class="ico">⚙️</span>Setări</button>
+</nav>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
