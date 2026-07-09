@@ -1,3 +1,5 @@
 node_modules/
 out/
 .cache/
+public/source.mp4
+public/music.mp3

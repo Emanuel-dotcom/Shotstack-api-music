@@ -1,0 +1,26 @@
+{
+  "name": "reel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
+    "@fontsource-variable/montserrat": "^5.2.8",
+    "@fontsource/archivo-black": "^5.2.8",
+    "@fontsource/dancing-script": "^5.2.8",
+    "@fontsource/shrikhand": "^5.2.8",
+    "@remotion/bundler": "^4.0.486",
+    "@remotion/cli": "^4.0.486",
+    "@remotion/renderer": "^4.0.486",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "remotion": "^4.0.486"
+  }
+}
