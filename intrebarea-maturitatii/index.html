@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="ro" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Prezentare: Cap. 5 „Întrebarea maturității” din Better Decisions, Fewer Regrets (Andy Stanley).">
+<title>Întrebarea maturității</title>
+<!--
+  GHID RAPID PENTRU PREZENTATOR
+  ------------------------------------------------------------
+  Navigare:  → ↓ PageDown Spațiu = înainte · ← ↑ PageUp = înapoi
+             Home / End = primul / ultimul slide · F = ecran complet
+  De înlocuit (caută în fișier, Ctrl+F):
+    [EXEMPLU PERSONAL]  → slide 1, povestea ta
+    [PAG. __]           → numărul paginii din carte (singura confirmată: 141)
+  Slide-ul „Răscumpărarea timpului” la final:
+    pune MUTA_RASCUMPARAREA_LA_FINAL = true (în <script>, jos)
+    sau deschide fișierul cu ?final la sfârșitul adresei.
+  Timp sugerat (≈ 9:30):
+    1 Hook 1:00 · 2 Greșit vs. înțelept 1:00 · 3 Lentile 1:30 · 4 Verdict 1:30
+    5 Conexiuni 1:00 · 6 Răscumpărare 2:00 · 7 Greșeli 0:45 · 8 Plan 0:45
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>document.documentElement.className = "js";</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg: #0b0d12;
+    --surface: #141924;
+    --surface-2: #1c2231;
+    --line: #2d3547;
+    --text: #f3f5f9;
+    --muted: #b6bfce;
+    --dim: #8f99ac;
+    --past: #6cb2ff;
+    --present: #ffc24d;
+    --future: #4fd690;
+    --danger: #ff7a7a;
+    --on-color: #0b0d12;
+
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+    --gutter: clamp(16px, 4vw, 72px);
+    --fs-title: clamp(2.1rem, 1rem + 4.2vw, 5.25rem);
+    --fs-title-md: clamp(2rem, 1rem + 2.8vw, 4.25rem);
+    --fs-lead: clamp(1.15rem, 0.85rem + 1vw, 1.9rem);
+    --fs-body: clamp(1rem, 0.82rem + 0.55vw, 1.4rem);
+    --fs-small: clamp(0.875rem, 0.78rem + 0.3vw, 1.1rem);
+    --gap: clamp(14px, 2.4vh, 32px);
+    --radius: 18px;
+    color-scheme: dark;
+  }
+  @media (min-width: 1024px) {
+    :root {
+      --fs-title: clamp(3rem, 1rem + 4.2vw, 5.25rem);
+      --fs-title-md: clamp(3rem, 1.1rem + 2.6vw, 4.25rem);
+    }
+  }
+  /* Laptopuri joase (ex. 1366×768): comprimă spațiile, nu tipografia titlurilor. */
+  @media (min-width: 1024px) and (max-height: 860px) {
+    :root {
+      --fs-lead: clamp(1.05rem, 0.7rem + 0.9vw, 1.6rem);
+      --fs-body: clamp(0.95rem, 0.7rem + 0.5vw, 1.2rem);
+      --gap: clamp(10px, 1.8vh, 20px);
+      --fs-title: clamp(3rem, 0.5rem + 4vw, 4.5rem);
+    }
+    .slide-inner { padding-top: 60px; }
+  }
+
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+  body {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    line-height: 1.45;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, p, ul, ol { margin: 0; }
+  button, input, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--present); outline-offset: 3px; border-radius: 6px; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ============ DECK ============ */
+  .deck {
+    height: 100vh; height: 100dvh;
+    overflow-y: auto; overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: contain;
+  }
+  .slide {
+    min-height: 100vh; min-height: 100dvh;
+    display: flex;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  .slide + .slide { border-top: 1px solid #161b26; }
+  .slide-inner {
+    width: 100%;
+    max-width: 1680px;
+    margin: auto;
+    padding: clamp(64px, 9vh, 100px) var(--gutter) clamp(92px, 11vh, 116px);
+    display: flex; flex-direction: column; justify-content: center;
+    gap: var(--gap);
+    min-width: 0;
+  }
+  @media (max-width: 820px), (max-height: 560px) {
+    .deck { scroll-snap-type: y proximity; }
+    .slide { scroll-snap-stop: normal; }
+  }
+
+  /* ============ CHROME ============ */
+  .chrome-top {
+    position: fixed; inset: 0 0 auto 0; z-index: 20; pointer-events: none;
+    background: linear-gradient(var(--bg) 40%, rgba(11, 13, 18, 0));
+  }
+  .progress { height: 5px; background: rgba(255, 255, 255, 0.08); }
+  .progress-fill {
+    height: 100%; width: 0;
+    background: linear-gradient(90deg, var(--past), var(--present), var(--future));
+    transition: width 0.45s ease;
+  }
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 12px var(--gutter) 18px;
+    font-size: var(--fs-small); color: var(--muted);
+  }
+  .topbar .deck-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .counter { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .counter b { color: var(--text); }
+
+  .controls {
+    position: fixed; z-index: 20;
+    right: var(--gutter); bottom: max(16px, env(safe-area-inset-bottom));
+    display: flex; gap: 10px;
+  }
+  .ctrl {
+    width: 54px; height: 54px; border-radius: 50%;
+    border: 1px solid var(--line); background: rgba(20, 25, 36, 0.88);
+    color: var(--text); display: grid; place-items: center; cursor: pointer;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .ctrl:hover:not(:disabled) { background: var(--surface-2); }
+  .ctrl:disabled { opacity: 0.35; cursor: default; }
+  .ctrl svg { width: 24px; height: 24px; }
+  .ctrl--next { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .ctrl--next:hover:not(:disabled) { background: #fff; }
+
+  /* ============ TYPE ============ */
+  .kicker {
+    display: flex; align-items: center; gap: 0.7em; flex-wrap: wrap;
+    font-size: var(--fs-small); font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .kicker .num { color: var(--text); font-variant-numeric: tabular-nums; }
+  .kicker .num::after { content: ""; display: inline-block; width: 28px; height: 2px; margin-left: 0.7em; vertical-align: middle; background: var(--line); }
+  .title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: var(--fs-title); line-height: 1.04; letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .title--md { font-size: var(--fs-title-md); }
+  .lead { font-size: var(--fs-lead); color: var(--muted); max-width: 44ch; text-wrap: pretty; line-height: 1.35; }
+  .c-past { color: var(--past); }
+  .c-present { color: var(--present); }
+  .c-future { color: var(--future); }
+  .dim { color: var(--dim); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: clamp(16px, 2.2vw, 30px);
+    min-width: 0;
+  }
+  .card-label {
+    font-size: var(--fs-small); font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  /* Marcaje de completat manual */
+  .pag, .placeholder-tag {
+    display: inline-block; vertical-align: middle;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: clamp(0.75rem, 0.7rem + 0.2vw, 0.95rem); font-weight: 600;
+    letter-spacing: 0; text-transform: none; line-height: 1.3;
+    padding: 0.2em 0.55em; border: 1.5px dashed var(--present); border-radius: 6px;
+    color: var(--present); background: rgba(255, 194, 77, 0.08); white-space: nowrap;
+  }
+  .title .pag { font-size: clamp(0.8rem, 0.7rem + 0.35vw, 1.1rem); margin-left: 0.4em; position: relative; top: -0.4em; }
+
+  .btn {
+    min-height: 48px; padding: 10px 22px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface-2);
+    font-weight: 600; font-size: var(--fs-small); cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn:hover { border-color: var(--muted); }
+  .btn--primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .btn--primary:hover { background: #fff; }
+  .text-input {
+    width: 100%; min-height: 48px; padding: 10px 16px;
+    border-radius: 12px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); font-size: var(--fs-body);
+  }
+  .text-input::placeholder { color: var(--dim); }
+  .text-input:focus-visible { outline-offset: 1px; border-color: var(--present); }
+  .field-label { display: block; font-weight: 600; margin-bottom: 6px; font-size: var(--fs-small); color: var(--muted); }
+
+  kbd {
+    font-family: var(--font-body); font-size: 0.85em; font-weight: 600;
+    padding: 0.1em 0.5em; border-radius: 6px; border: 1px solid var(--line);
+    border-bottom-width: 3px; background: var(--surface); color: var(--text);
+  }
+
+  /* ============ ENTRY ANIMATIONS ============ */
+  .js .reveal {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: calc(var(--d, 0) * 110ms);
+  }
+  .js .slide.is-active .reveal { opacity: 1; transform: none; }
+
+  /* Fragmente: apar pe rând, la → (slide 3) */
+  .js [data-fragment] { transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s; }
+  .js [data-fragment]:not(.shown) { opacity: 0.35; transform: translateY(14px); border-style: dashed; cursor: pointer; }
+  .js [data-fragment]:not(.shown) > :not(.lens-name) { visibility: hidden; }
+  .frag-hint { font-size: var(--fs-small); color: var(--dim); visibility: hidden; }
+  .slide.has-hidden .frag-hint { visibility: visible; }
+
+  /* ============ SLIDE 1 · HOOK ============ */
+  .hook-title .soft { color: var(--dim); }
+  .hook-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px); max-width: 1320px; }
+  .example-text { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-lead); line-height: 1.25; margin-top: 10px; }
+  .example-text em { font-style: normal; color: var(--present); }
+  .card--placeholder { border: 2px dashed var(--present); background: rgba(255, 194, 77, 0.05); }
+  .card--placeholder .placeholder-tag { font-size: var(--fs-small); }
+  .hint-keys { font-size: var(--fs-small); color: var(--dim); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  @media (hover: none) { .hint-keys { display: none; } }
+
+  /* ============ SLIDE 2 · GREȘIT vs ÎNȚELEPT ============ */
+  .versus { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.3fr); gap: clamp(12px, 2vw, 28px); align-items: stretch; }
+  .vs-badge { align-self: center; font-family: var(--font-display); font-size: var(--fs-lead); color: var(--dim); }
+  .weak { display: flex; flex-direction: column; gap: 14px; }
+  .weak-list { list-style: none; padding: 0; display: grid; gap: 0.3em; font-family: var(--font-display); font-size: var(--fs-lead); color: var(--muted); }
+  .weak-list li::before { content: "?"; display: inline-block; width: 1.2em; color: var(--dim); }
+  .strong {
+    display: flex; flex-direction: column; gap: 14px;
+    border: 2px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(120deg, var(--past), var(--present), var(--future)) border-box;
+  }
+  .strong .card-label { color: var(--text); }
+  .big-q { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.4rem, 0.9rem + 1.7vw, 2.75rem); line-height: 1.15; text-wrap: balance; }
+  .card-note { color: var(--muted); margin-top: auto; }
+  .keymsg {
+    display: flex; gap: 14px; align-items: center;
+    padding: 14px 20px; border-left: 5px solid var(--present);
+    background: rgba(255, 194, 77, 0.07); border-radius: 10px;
+    font-size: var(--fs-lead); line-height: 1.3;
+  }
+  .keymsg strong { color: var(--present); }
+
+  /* ============ SLIDE 3 · LENTILE ============ */
+  .lenses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
+  .lens { --c: var(--past); border-top: 6px solid var(--c); display: flex; flex-direction: column; gap: 14px; }
+  .lens--present { --c: var(--present); }
+  .lens--future { --c: var(--future); }
+  .lens-name { display: flex; align-items: center; gap: 10px; color: var(--c); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: var(--fs-small); }
+  .lens-name svg { width: 28px; height: 28px; flex: none; }
+  .lens-q { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.3rem, 0.85rem + 1.3vw, 2.3rem); line-height: 1.15; }
+  .lens-ex { color: var(--muted); }
+  .lens-ex b { color: var(--text); font-weight: 600; }
+  .lens .pag { align-self: flex-start; margin-top: auto; }
+
+  /* ============ SLIDE 4 · VERDICT ============ */
+  .verdict-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(18px, 3vw, 44px); align-items: start; }
+  .q-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 20px; align-items: center;
+    padding: clamp(10px, 1.6vh, 16px) 0; border-top: 1px solid var(--line);
+  }
+  .q-row:first-of-type { margin-top: clamp(10px, 1.8vh, 18px); }
+  .q-text { line-height: 1.3; }
+  .q-lens { display: block; font-size: var(--fs-small); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 4px; background: var(--bg); }
+  .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .seg label {
+    padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center;
+    border-radius: 999px; cursor: pointer; white-space: nowrap;
+    font-weight: 600; font-size: var(--fs-small); color: var(--muted);
+    transition: background 0.2s, color 0.2s;
+  }
+  .seg label:hover { color: var(--text); }
+  .seg input:focus-visible + label { outline: 3px solid var(--text); outline-offset: 1px; }
+  .seg input[value="da"]:checked + label { background: var(--future); color: var(--on-color); }
+  .seg input[value="nu"]:checked + label { background: var(--danger); color: var(--on-color); }
+  .seg input[value="ns"]:checked + label { background: var(--present); color: var(--on-color); }
+
+  .verdict {
+    --vc: var(--line);
+    display: grid; justify-items: center; text-align: center; gap: clamp(10px, 1.8vh, 16px);
+    border: 2px solid var(--vc); transition: border-color 0.35s, box-shadow 0.35s;
+  }
+  .verdict[data-state="green"] { --vc: var(--future); }
+  .verdict[data-state="yellow"] { --vc: var(--present); }
+  .verdict[data-state="red"] { --vc: var(--danger); }
+  .verdict:not([data-state="empty"]) { box-shadow: 0 0 60px -20px var(--vc); }
+  .lights { display: flex; gap: 14px; padding: 12px 18px; border-radius: 999px; background: #07090d; border: 1px solid var(--line); }
+  .light { width: clamp(34px, 3.6vw, 54px); aspect-ratio: 1; border-radius: 50%; background: #20263380; border: 1px solid #2a3140; transition: background 0.35s, box-shadow 0.35s; }
+  .verdict[data-state="red"] .light--r { background: var(--danger); box-shadow: 0 0 28px var(--danger); }
+  .verdict[data-state="yellow"] .light--y { background: var(--present); box-shadow: 0 0 28px var(--present); }
+  .verdict[data-state="green"] .light--g { background: var(--future); box-shadow: 0 0 28px var(--future); }
+  .verdict-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.6rem, 1rem + 1.8vw, 2.9rem); line-height: 1.1; color: var(--vc); }
+  .verdict[data-state="empty"] .verdict-title { color: var(--muted); }
+  .verdict-msg { max-width: 30ch; }
+  .verdict-decision { color: var(--muted); font-style: italic; max-width: 32ch; }
+  .verdict-decision:empty { display: none; }
+
+  /* ============ SLIDE 5 · HARTA ============ */
+  .map-layout { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: clamp(18px, 3vw, 40px); align-items: center; }
+  .map { position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 60vh; }
+  .map-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .map-lines line { stroke: var(--line); stroke-width: 2; vector-effect: non-scaling-stroke; transition: stroke 0.25s; }
+  .map-lines line.is-on { stroke: var(--present); stroke-width: 3; }
+  .node {
+    position: absolute; transform: translate(-50%, -50%);
+    width: max-content; max-width: clamp(130px, 13vw, 230px);
+    padding: 10px 14px; border-radius: 14px;
+    border: 1px solid var(--line); background: var(--surface);
+    text-align: center; line-height: 1.2; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .node strong { display: block; font-size: clamp(0.95rem, 0.7rem + 0.5vw, 1.3rem); }
+  .node span { display: block; font-size: var(--fs-small); color: var(--muted); margin-top: 2px; }
+  .node:hover, .node.is-on { border-color: var(--present); background: var(--surface-2); box-shadow: 0 0 0 3px rgba(255, 194, 77, 0.22); }
+  .node--center {
+    left: 50%; top: 50%; cursor: default; pointer-events: none;
+    padding: 14px 20px; max-width: clamp(150px, 15vw, 260px);
+    font-family: var(--font-display); font-weight: 700; font-size: clamp(1.05rem, 0.8rem + 0.7vw, 1.6rem);
+    border: 2px solid transparent;
+    background:
+      linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+      linear-gradient(120deg, var(--past), var(--present), var(--future)) border-box;
+  }
+  .map-detail { display: flex; flex-direction: column; gap: 12px; min-height: clamp(220px, 34vh, 380px); }
+  .map-detail h3 { font-family: var(--font-display); font-size: clamp(1.4rem, 1rem + 1.2vw, 2.3rem); line-height: 1.1; }
+  .map-detail .who { color: var(--muted); font-size: var(--fs-small); }
+  .map-detail .link { border-top: 1px solid var(--line); padding-top: 12px; }
+  .map-detail .link b { color: var(--present); }
+  .map-detail .empty { color: var(--dim); margin: auto 0; }
+
+  /* ============ SLIDE 6 · RĂSCUMPĂRARE ============ */
+  .redeem {
+    display: grid; align-items: start;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas: "head warn" "left right";
+    gap: var(--gap) clamp(18px, 3vw, 48px);
+  }
+  .redeem-head { grid-area: head; display: grid; gap: clamp(8px, 1.4vh, 14px); }
+  .redeem > .warn { grid-area: warn; align-self: end; }
+  .redeem-col { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+  .redeem-left { grid-area: left; }
+  .redeem-right { grid-area: right; }
+
+  .timeline { display: grid; grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1.25fr); align-items: center; margin-top: 30px; }
+  .tl-past {
+    height: 58px; border-radius: 10px 0 0 10px;
+    background: repeating-linear-gradient(135deg, #3a4150 0 10px, #2a303c 10px 20px);
+    display: flex; align-items: center; justify-content: center; padding: 0 10px;
+    color: #e3e7ee; font-size: var(--fs-small); font-weight: 600; text-align: center; line-height: 1.15;
+  }
+  .tl-now { position: relative; height: 58px; display: grid; place-items: center; }
+  .tl-now::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; transform: translateY(-50%); background: var(--line); }
+  .tl-dot { position: relative; width: 28px; height: 28px; border-radius: 50%; background: var(--text); box-shadow: 0 0 0 6px rgba(243, 245, 249, 0.18); }
+  .tl-now-label { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); font-weight: 700; letter-spacing: 0.12em; font-size: var(--fs-small); }
+  .tl-future {
+    height: 58px; background: var(--future); color: var(--on-color);
+    clip-path: polygon(0 20%, calc(100% - 32px) 20%, calc(100% - 32px) 0, 100% 50%, calc(100% - 32px) 100%, calc(100% - 32px) 80%, 0 80%);
+    display: flex; align-items: center; padding: 0 44px 0 14px;
+    font-size: var(--fs-small); font-weight: 700; white-space: nowrap; overflow: hidden;
+    transform-origin: left center;
+  }
+  .js .tl-future { transform: scaleX(0); transition: transform 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.5s; }
+  .js .slide.is-active .tl-future { transform: none; }
+  .tl-caps { display: grid; grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1.25fr); font-size: var(--fs-small); margin-top: 8px; }
+  .tl-back { color: var(--danger); text-decoration: line-through; text-decoration-thickness: 2px; }
+  .tl-fwd { color: var(--future); grid-column: 3; }
+
+  .redeem-msg { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-lead); line-height: 1.25; }
+  .redeem-msg em { font-style: normal; color: var(--future); }
+  .mr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .mr .card { padding: clamp(12px, 1.6vw, 22px); }
+  .mr-label { font-size: var(--fs-small); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .mr-myth { border-color: rgba(255, 122, 122, 0.55); }
+  .mr-myth .mr-label { color: var(--danger); }
+  .mr-real { border-color: rgba(79, 214, 144, 0.55); }
+  .mr-real .mr-label { color: var(--future); }
+  .mr-text { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.05rem, 0.8rem + 0.7vw, 1.6rem); line-height: 1.2; margin-top: 4px; }
+
+  .exercise { display: flex; flex-direction: column; gap: clamp(8px, 1.3vh, 12px); }
+  .exercise h3 { font-size: var(--fs-body); }
+  .step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 12px; align-items: center; }
+  .step-n {
+    width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--surface-2); border: 1px solid var(--line); font-weight: 700; font-size: var(--fs-small);
+    grid-row: span 2; align-self: end; margin-bottom: 7px;
+  }
+  .step .field-label { margin: 0; }
+  .ex-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .ex-note { font-size: var(--fs-small); color: var(--dim); }
+  .redeem-out {
+    border-left: 4px solid var(--future); padding: 8px 14px; background: rgba(79, 214, 144, 0.07);
+    border-radius: 8px; line-height: 1.35;
+  }
+  .redeem-out:empty { display: none; }
+  .redeem-out[data-state="warn"] { border-color: var(--present); background: rgba(255, 194, 77, 0.07); }
+  .redeem-out strong { color: var(--text); }
+
+  .warn {
+    display: flex; gap: 14px; align-items: flex-start;
+    border: 2px solid var(--present); background: rgba(255, 194, 77, 0.1);
+    border-radius: 14px; padding: clamp(12px, 1.6vh, 16px) 18px; line-height: 1.3;
+  }
+  .warn svg { width: 30px; height: 30px; flex: none; color: var(--present); }
+  .warn strong { display: block; font-size: var(--fs-lead); color: var(--present); font-family: var(--font-display); }
+  .warn span { color: var(--muted); }
+  .mini-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; font-size: var(--fs-small); color: var(--muted); line-height: 1.3; }
+  .mini-links b { display: block; color: var(--text); }
+
+  /* ============ SLIDE 7 · GREȘELI ============ */
+  .mistakes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(12px, 1.6vw, 22px); }
+  .mistake { --c: var(--muted); grid-column: span 2; display: flex; flex-direction: column; gap: 12px; border-left: 5px solid var(--c); }
+  .mistake:nth-child(n + 4) { grid-column: span 3; }
+  .mistake[data-lens="past"] { --c: var(--past); }
+  .mistake[data-lens="present"] { --c: var(--present); }
+  .mistake[data-lens="future"] { --c: var(--future); }
+  .mistake[data-lens="redeem"] { --c: var(--danger); }
+  .mistake q { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.2rem, 0.8rem + 1.1vw, 2rem); line-height: 1.15; quotes: "„" "”"; }
+  .mistake .fix { color: var(--muted); }
+  .mistake .fix::before { content: "→ "; color: var(--c); font-weight: 700; }
+  .tag {
+    align-self: flex-start; margin-top: auto;
+    font-size: var(--fs-small); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--c); border: 1px solid var(--c); border-radius: 999px; padding: 2px 12px;
+  }
+
+  /* ============ SLIDE 8 · PLAN ============ */
+  .plan-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(18px, 3vw, 44px); align-items: stretch; }
+  .checklist { list-style: none; padding: 0; display: grid; gap: 12px; }
+  .check {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center;
+    padding: clamp(12px, 1.8vh, 18px) 18px; border: 1px solid var(--line); border-radius: 14px;
+    background: var(--surface); cursor: pointer; transition: border-color 0.25s, background 0.25s;
+  }
+  .check input {
+    appearance: none; -webkit-appearance: none; margin: 0;
+    width: 32px; height: 32px; border-radius: 9px; border: 2px solid var(--muted);
+    display: grid; place-items: center; cursor: pointer; transition: background 0.2s, border-color 0.2s;
+  }
+  .check input::after {
+    content: ""; width: 9px; height: 16px; margin-top: -3px;
+    border: solid var(--on-color); border-width: 0 3px 3px 0; transform: rotate(45deg) scale(0);
+    transition: transform 0.2s;
+  }
+  .check input:checked { background: var(--future); border-color: var(--future); }
+  .check input:checked::after { transform: rotate(45deg) scale(1); }
+  .check.is-done { border-color: rgba(79, 214, 144, 0.6); background: rgba(79, 214, 144, 0.06); }
+  .check-text { font-size: var(--fs-lead); line-height: 1.25; }
+  .check-text small { display: block; font-size: var(--fs-small); color: var(--muted); margin-top: 2px; }
+  .plan-status { font-size: var(--fs-small); color: var(--muted); margin-top: 10px; }
+  .plan-status.is-done { color: var(--future); font-weight: 600; }
+  .takeaway { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+  .closing { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.8rem, 1rem + 3vw, 4.25rem); line-height: 1.08; letter-spacing: -0.015em; text-wrap: balance; }
+  .closing .accent {
+    background: linear-gradient(90deg, var(--past), var(--present), var(--future));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1100px) {
+    .mistakes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mistake, .mistake:nth-child(n + 4) { grid-column: auto; }
+    .mistake:last-child { grid-column: 1 / -1; }
+  }
+  @media (max-width: 900px) {
+    .verdict-layout, .plan-layout, .map-layout { grid-template-columns: minmax(0, 1fr); }
+    .redeem { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "left" "right" "warn"; }
+    .lenses { grid-template-columns: minmax(0, 1fr); }
+    .map { aspect-ratio: auto; max-height: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .map-lines { display: none; }
+    .node, .node--center { position: static; transform: none; max-width: none; width: auto; }
+    .node--center { grid-column: 1 / -1; }
+    .map-detail { min-height: 0; }
+  }
+  @media (max-width: 680px) {
+    .hook-grid, .mr, .mini-links, .mistakes { grid-template-columns: minmax(0, 1fr); }
+    .mistake:last-child { grid-column: auto; }
+    .versus { grid-template-columns: minmax(0, 1fr); }
+    .vs-badge { justify-self: center; }
+    .q-row { grid-template-columns: minmax(0, 1fr); }
+    .seg { justify-self: start; }
+    .seg label { padding: 10px 14px; }
+    .timeline, .tl-caps { grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1.1fr); }
+    .tl-future { padding-right: 36px; white-space: normal; line-height: 1.1; }
+    .ctrl { width: 48px; height: 48px; }
+    .controls {
+      left: 0; right: 0; bottom: 0; justify-content: flex-end;
+      padding: 22px var(--gutter) max(12px, env(safe-area-inset-bottom));
+      background: linear-gradient(rgba(11, 13, 18, 0), var(--bg) 45%);
+    }
+    .topbar .deck-name { display: none; }
+    .topbar { justify-content: flex-end; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js .reveal, .js [data-fragment], .js .tl-future, .progress-fill, .light, .verdict { transition: none !important; }
+    .js .reveal { opacity: 1; transform: none; }
+    .js .tl-future { transform: none; }
+    .js [data-fragment]:not(.shown) { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-top">
+  <div class="progress" role="progressbar" aria-label="Progres prezentare" aria-valuemin="1" aria-valuemax="8" aria-valuenow="1">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="topbar">
+    <span class="deck-name">Cap. 5 · Întrebarea maturității</span>
+    <span class="counter" aria-live="polite">Slide <b id="slideNow">1</b> / <span id="slideTotal">8</span></span>
+  </div>
+</div>
+
+<nav class="controls" aria-label="Navigare prezentare">
+  <button class="ctrl" id="btnFs" type="button" aria-label="Ecran complet (F)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+  </button>
+  <button class="ctrl" id="btnPrev" type="button" aria-label="Slide anterior">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <button class="ctrl ctrl--next" id="btnNext" type="button" aria-label="Slide următor">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+</nav>
+
+<main class="deck" id="deck" aria-label="Prezentare: Întrebarea maturității">
+
+  <!-- ===================== SLIDE 1 · HOOK ===================== -->
+  <section class="slide" id="hook" aria-roledescription="slide" aria-label="Hook">
+    <div class="slide-inner">
+      <p class="kicker reveal"><span class="num">01</span> Cap. 5 · Întrebarea maturității <span class="pag">[PAG. __]</span></p>
+      <h1 class="title hook-title reveal" style="--d:1"><span class="soft">Legal. Moral.</span><br>Și totuși o decizie proastă.</h1>
+      <div class="hook-grid">
+        <div class="card reveal" style="--d:3">
+          <p class="card-label">Exemplu</p>
+          <p class="example-text">„Pot să mă mut cu cineva după 2 luni. Nu e greșit. <em>Dar e înțelept?</em>”</p>
+        </div>
+        <!-- EDITEAZĂ: înlocuiește [EXEMPLU PERSONAL] cu povestea ta (max. 25 de cuvinte). -->
+        <div class="card card--placeholder reveal" style="--d:4">
+          <p class="card-label">Exemplul meu</p>
+          <p class="example-text"><span class="placeholder-tag">[EXEMPLU PERSONAL]</span></p>
+        </div>
+      </div>
+      <p class="hint-keys reveal" style="--d:6">
+        <span><kbd>→</kbd> <kbd>↓</kbd> înainte</span>
+        <span><kbd>←</kbd> <kbd>↑</kbd> înapoi</span>
+        <span><kbd>F</kbd> ecran complet</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 2 · GREȘIT vs ÎNȚELEPT ===================== -->
+  <section class="slide" id="intrebarea" aria-roledescription="slide" aria-label="Greșit sau înțelept">
+    <div class="slide-inner">
+      <p class="kicker reveal"><span class="num">02</span> Schimbă întrebarea</p>
+      <h2 class="title reveal" style="--d:1">„E greșit?” nu e întrebarea bună.</h2>
+      <div class="versus">
+        <div class="card weak reveal" style="--d:2">
+          <p class="card-label">Întrebarea slabă</p>
+          <ul class="weak-list">
+            <li>E greșit?</li>
+            <li>E legal?</li>
+            <li>Mai face lumea?</li>
+          </ul>
+          <p class="card-note">Îți spune doar dacă ești deasupra podelei.</p>
+        </div>
+        <span class="vs-badge reveal" style="--d:3" aria-hidden="true">vs.</span>
+        <div class="card strong reveal" style="--d:4">
+          <p class="card-label">Întrebarea puternică</p>
+          <p class="big-q">„Ținând cont de <span class="c-past">trecutul</span>, <span class="c-present">prezentul</span> și <span class="c-future">viitorul</span> meu, care e lucrul înțelept de făcut?”</p>
+          <p class="card-note">Te întreabă unde ajungi, nu doar ce ai voie. <span class="pag">[PAG. __]</span></p>
+        </div>
+      </div>
+      <p class="keymsg reveal" style="--d:6"><strong>Bara minimă ≠ decizie bună.</strong> Legal și moral e podeaua, nu ținta.</p>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 3 · LENTILE ===================== -->
+  <section class="slide" id="lentile" aria-roledescription="slide" aria-label="Cele trei lentile">
+    <div class="slide-inner">
+      <p class="kicker reveal"><span class="num">03</span> Cum răspunzi la ea</p>
+      <h2 class="title reveal" style="--d:1">Trei lentile. O singură decizie.</h2>
+      <p class="lead reveal" style="--d:2">Fiecare lentilă e o întrebare-test. Una singură nu ajunge.</p>
+      <div class="lenses">
+        <article class="card lens" data-fragment>
+          <p class="lens-name">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>
+            Trecut
+          </p>
+          <p class="lens-q">„Ce m-a învățat experiența mea, inclusiv greșelile?”</p>
+          <p class="lens-ex"><b>Exemplu:</b> a treia relație care se termină la fel? Nu e ghinion. E un tipar.</p>
+          <span class="pag">[PAG. __]</span>
+        </article>
+        <article class="card lens lens--present" data-fragment>
+          <p class="lens-name">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+            Prezent
+          </p>
+          <p class="lens-q">„Cum sunt eu acum?”</p>
+          <p class="lens-ex"><b>Exemplu:</b> obosit, supărat, singur sau fără bani? Starea de acum îți strâmbă decizia.</p>
+          <span class="pag">[PAG. __]</span>
+        </article>
+        <article class="card lens lens--future" data-fragment>
+          <p class="lens-name">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h16"/><path d="M14 6l6 6-6 6"/></svg>
+            Viitor
+          </p>
+          <p class="lens-q">„Unde duce asta peste 1, 5 și 10 ani?”</p>
+          <p class="lens-ex"><b>Exemplu:</b> rata la telefon pare mică azi. Peste un an încă o plătești.</p>
+          <span class="pag">[PAG. __]</span>
+        </article>
+      </div>
+      <p class="frag-hint" aria-hidden="true">Apasă <kbd>→</kbd> pentru următoarea lentilă</p>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 4 · VERDICT ===================== -->
+  <section class="slide" id="verdict" aria-roledescription="slide" aria-label="Verdictul deciziei">
+    <div class="slide-inner">
+      <p class="kicker reveal"><span class="num">04</span> Încearcă acum</p>
+      <h2 class="title reveal" style="--d:1">Verdictul deciziei</h2>
+      <div class="verdict-layout">
+        <form class="reveal" style="--d:2" id="verdictForm" autocomplete="off" aria-label="Testul celor trei lentile">
+          <label class="field-label" for="decizie">Ce decizie iei?</label>
+          <input class="text-input" id="decizie" name="decizie" type="text" maxlength="90" placeholder="ex: Îmi iau mașină în rate">
+
+          <div class="q-row">
+            <p class="q-text" id="q-trecut"><span class="q-lens c-past">Trecut</span>Experiența mea, inclusiv greșelile, susține decizia asta?</p>
+            <div class="seg" role="radiogroup" aria-labelledby="q-trecut">
+              <input type="radio" id="t-da" name="trecut" value="da"><label for="t-da">Da</label>
+              <input type="radio" id="t-nu" name="trecut" value="nu"><label for="t-nu">Nu</label>
+              <input type="radio" id="t-ns" name="trecut" value="ns"><label for="t-ns">Nu știu</label>
+            </div>
+          </div>
+          <div class="q-row">
+            <p class="q-text" id="q-prezent"><span class="q-lens c-present">Prezent</span>Sunt calm, odihnit și lucid când decid?</p>
+            <div class="seg" role="radiogroup" aria-labelledby="q-prezent">
+              <input type="radio" id="p-da" name="prezent" value="da"><label for="p-da">Da</label>
+              <input type="radio" id="p-nu" name="prezent" value="nu"><label for="p-nu">Nu</label>
+              <input type="radio" id="p-ns" name="prezent" value="ns"><label for="p-ns">Nu știu</label>
+            </div>
+          </div>
+          <div class="q-row">
+            <p class="q-text" id="q-viitor"><span class="q-lens c-future">Viitor</span>Peste 1, 5 și 10 ani mă voi bucura de ea?</p>
+            <div class="seg" role="radiogroup" aria-labelledby="q-viitor">
+              <input type="radio" id="v-da" name="viitor" value="da"><label for="v-da">Da</label>
+              <input type="radio" id="v-nu" name="viitor" value="nu"><label for="v-nu">Nu</label>
+              <input type="radio" id="v-ns" name="viitor" value="ns"><label for="v-ns">Nu știu</label>
+            </div>
+          </div>
+        </form>
+
+        <div class="card verdict reveal" style="--d:3" id="verdictBox" data-state="empty" aria-live="polite">
+          <div class="lights" aria-hidden="true">
+            <span class="light light--r"></span>
+            <span class="light light--y"></span>
+            <span class="light light--g"></span>
+          </div>
+          <p class="verdict-title" id="verdictTitle">Aștept răspunsurile</p>
+          <p class="verdict-msg" id="verdictMsg">Ai răspuns la 0 din 3 întrebări.</p>
+          <p class="verdict-decision" id="verdictDecision"></p>
+          <button class="btn" type="button" id="verdictReset">Reia</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 5 · CONEXIUNI ===================== -->
+  <section class="slide" id="conexiuni" aria-roledescription="slide" aria-label="Conexiuni din alte părți">
+    <div class="slide-inner">
+      <p class="kicker reveal"><span class="num">05</span> Conexiuni</p>
+      <h2 class="title reveal" style="--d:1">Nu e o idee izolată.</h2>
+      <div class="map-layout">
+        <div class="map reveal" style="--d:2" id="map">
+          <svg class="map-lines" id="mapLines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="node node--center" aria-hidden="true">Întrebarea maturității</div>
+          <button class="node" type="button"
+            data-idea="Înțelepciune practică: judecată bună, aplicată situației concrete."
+            data-link="Întrebarea maturității e phronesis: nu „am voie?”, ci „e înțelept aici?”.">
+            <strong>Phronesis</strong><span>Aristotel</span></button>
+          <button class="node" type="button"
+            data-idea="Sistemul 1: rapid, instinctiv. Sistemul 2: lent, atent."
+            data-link="Cele trei lentile te forțează să încetinești și să gândești cu Sistemul 2.">
+            <strong>Sistem 1 vs. 2</strong><span>Kahneman</span></button>
+          <button class="node" type="button"
+            data-idea="La 80 de ani, ce aș regreta mai mult?"
+            data-link="E lentila de viitor, folosită pentru deciziile mari.">
+            <strong>Regret minimization</strong><span>Bezos</span></button>
+          <button class="node" type="button"
+            data-idea="Cum vei vedea decizia peste 10 minute, 10 luni, 10 ani?"
+            data-link="Lentila de viitor, spartă în trei trepte concrete.">
+            <strong>Regula 10-10-10</strong><span>Suzy Welch</span></button>
+          <button class="node" type="button"
+            data-idea="Creierul supraevaluează ce primește acum (hyperbolic discounting). O bezea azi bate două mâine."
+            data-link="Lentila de prezent te prinde când „acum” cântărește prea mult.">
+            <strong>Testul bezelei</strong><span>Mischel</span></button>
+          <button class="node" type="button"
+            data-idea="Ulise s-a legat de catarg cât era lucid, ca să reziste sirenelor."
+            data-link="Îți stabilești regulile înainte, cu mintea limpede, nu în mijlocul tentației.">
+            <strong>Ulise și sirenele</strong><span>Homer</span></button>
+          <button class="node" type="button"
+            data-idea="Întoarce problema pe dos: ce ar garanta eșecul?"
+            data-link="Întreabă: ce mi-ar garanta regretul? Apoi evită exact asta.">
+            <strong>Inversiunea</strong><span>Munger</span></button>
+        </div>
+        <div class="card map-detail reveal" style="--d:3" id="mapDetail" aria-live="polite">
+          <p class="empty">Atinge sau treci cu mouse-ul peste un nod ca să vezi legătura cu întrebarea maturității.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 6 · RĂSCUMPĂRAREA TIMPULUI ===================== -->
+  <section class="slide" id="rascumparare" aria-roledescription="slide" aria-label="Răscumpărarea timpului">
+    <div class="slide-inner">
+      <div class="redeem">
+        <div class="redeem-head">
+          <p class="kicker reveal"><span class="num">06</span> Cel mai important</p>
+          <h2 class="title title--md reveal" style="--d:1">Răscumpărarea timpului <span class="pag">[PAG. 141]</span></h2>
+          <p class="lead reveal" style="--d:2">Dacă te-ai putea întoarce să îndrepți o decizie, ai face-o. Dar nu poți. <strong style="color:var(--text)">Ce poți face?</strong></p>
+        </div>
+
+        <div class="warn reveal" style="--d:7">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5"/><circle cx="12" cy="18" r="0.6" fill="currentColor"/></svg>
+          <p><strong>Răscumpărarea începe azi, nu mâine.</strong><span>„Recuperez mai târziu” nu e răscumpărare. E amânare.</span></p>
+        </div>
+
+        <div class="redeem-col redeem-left">
+          <div class="reveal" style="--d:3">
+            <div class="timeline" role="img" aria-label="Linia timpului: în trecut, timp pierdut cu o decizie greșită. Din prezent, o săgeată spre viitor. Înapoi nu se poate.">
+              <div class="tl-past">timp pierdut cu o decizie greșită</div>
+              <div class="tl-now"><span class="tl-now-label">AZI</span><span class="tl-dot"></span></div>
+              <div class="tl-future">decizii înțelepte</div>
+            </div>
+            <div class="tl-caps" aria-hidden="true">
+              <span class="tl-back">← înapoi și repar</span>
+              <span class="tl-fwd">→ de aici se răscumpără</span>
+            </div>
+          </div>
+          <p class="redeem-msg reveal" style="--d:4">Trecutul nu se schimbă. Dar deciziile înțelepte de azi îl fac să <em>nu fi fost în zadar</em>.</p>
+          <div class="mr reveal" style="--d:5">
+            <div class="card mr-myth">
+              <p class="mr-label">✕ Mit</p>
+              <p class="mr-text">„Mă întorc și repar.”</p>
+            </div>
+            <div class="card mr-real">
+              <p class="mr-label">✓ Realitate</p>
+              <p class="mr-text">„Decid înțelept acum și dau sens pierderii.”</p>
+            </div>
+          </div>
+          <div class="mini-links reveal" style="--d:6">
+            <p><b>Sunk cost</b>Nu continui ceva greșit doar pentru că ai investit deja în el.</p>
+            <p><b>Antifragil (Taleb)</b>Unele lucruri ies mai puternice din șocuri. Și tu, dacă înveți din ele.</p>
+          </div>
+        </div>
+
+        <div class="redeem-col redeem-right">
+          <form class="card exercise reveal" style="--d:4" id="redeemForm" autocomplete="off" aria-label="Exercițiu de răscumpărare">
+            <h3>Exercițiu: răscumpără o decizie</h3>
+            <div class="step">
+              <span class="step-n" aria-hidden="true">1</span>
+              <label class="field-label" for="r1">O decizie greșită din trecut</label>
+              <input class="text-input" id="r1" name="greseala" type="text" maxlength="80" placeholder="ex: am lăsat facultatea">
+            </div>
+            <div class="step">
+              <span class="step-n" aria-hidden="true">2</span>
+              <label class="field-label" for="r2">Ce m-a învățat?</label>
+              <input class="text-input" id="r2" name="lectie" type="text" maxlength="80" placeholder="ex: renunț când devine greu">
+            </div>
+            <div class="step">
+              <span class="step-n" aria-hidden="true">3</span>
+              <label class="field-label" for="r3">Ce decizie înțeleaptă iau azi din cauza asta?</label>
+              <input class="text-input" id="r3" name="azi" type="text" maxlength="80" placeholder="ex: termin cursul început">
+            </div>
+            <div class="ex-actions">
+              <button class="btn btn--primary" type="submit">Leagă-le</button>
+              <button class="btn" type="reset">Șterge</button>
+              <span class="ex-note">Nimic nu se salvează.</span>
+            </div>
+            <p class="redeem-out" id="redeemOut" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 7 · GREȘELI FRECVENTE ===================== -->
+  <section class="slide" id="greseli" aria-roledescription="slide" aria-label="Greșeli frecvente">
+    <div class="slide-inner">
+      <p class="kicker reveal"><span class="num">07</span> Capcane</p>
+      <h2 class="title reveal" style="--d:1">Unde se pierde lumea</h2>
+      <p class="lead reveal" style="--d:2">Cinci scuze care sună bine și costă mult.</p>
+      <div class="mistakes">
+        <article class="card mistake reveal" style="--d:3">
+          <q>Nu e ilegal, deci e ok.</q>
+          <p class="fix">Legal e podeaua, nu ținta.</p>
+          <span class="tag">Întrebarea slabă</span>
+        </article>
+        <article class="card mistake reveal" style="--d:4" data-lens="past">
+          <q>Am mai făcut asta, dar acum e altceva.</q>
+          <p class="fix">Probabil nu e. Ascultă tiparul.</p>
+          <span class="tag">Trecut</span>
+        </article>
+        <article class="card mistake reveal" style="--d:5" data-lens="present">
+          <q>Decid când sunt obosit, supărat sau entuziasmat.</q>
+          <p class="fix">Starea de acum votează în locul tău. Amână.</p>
+          <span class="tag">Prezent</span>
+        </article>
+        <article class="card mistake reveal" style="--d:6" data-lens="future">
+          <q>Mă gândesc doar la mâine.</q>
+          <p class="fix">Întreabă: peste 1, 5, 10 ani?</p>
+          <span class="tag">Viitor</span>
+        </article>
+        <article class="card mistake reveal" style="--d:7" data-lens="redeem">
+          <q>Voi repara după.</q>
+          <p class="fix">„După” rar vine. Răscumpărarea începe azi.</p>
+          <span class="tag">Răscumpărare</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLIDE 8 · PLAN 24H ===================== -->
+  <section class="slide" id="plan" aria-roledescription="slide" aria-label="Plan de acțiune în 24 de ore">
+    <div class="slide-inner">
+      <p class="kicker reveal"><span class="num">08</span> Plan de acțiune</p>
+      <h2 class="title reveal" style="--d:1">Următoarele 24 de ore</h2>
+      <div class="plan-layout">
+        <div class="reveal" style="--d:2">
+          <ol class="checklist" id="checklist">
+            <li><label class="check"><input type="checkbox">
+              <span class="check-text">Alege o decizie pe care o ai în față.<small>Una reală, nu una ipotetică.</small></span></label></li>
+            <li><label class="check"><input type="checkbox">
+              <span class="check-text">Răspunde pe hârtie: <span class="c-past">Trecut</span> / <span class="c-present">Prezent</span> / <span class="c-future">Viitor</span>.<small>Scris, nu doar în minte.</small></span></label></li>
+            <li><label class="check"><input type="checkbox">
+              <span class="check-text">O lentilă spune „nu”? Amână 24 de ore și revino.<small>Amânarea e o decizie, nu o slăbiciune.</small></span></label></li>
+          </ol>
+          <p class="plan-status" id="planStatus" aria-live="polite">0 / 3 pași bifați</p>
+        </div>
+        <div class="card takeaway reveal" style="--d:3">
+          <p class="card-label">De luat acasă</p>
+          <p class="big-q">„Ținând cont de <span class="c-past">trecutul</span>, <span class="c-present">prezentul</span> și <span class="c-future">viitorul</span> meu, care e lucrul înțelept de făcut?”</p>
+        </div>
+      </div>
+      <p class="closing reveal" style="--d:5">Nu poți recupera ce a trecut. <span class="accent">Poți decide ce valoare are.</span></p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // Pune true ca slide-ul „Răscumpărarea timpului” să fie ultimul (închidere emoțională).
+  var MUTA_RASCUMPARAREA_LA_FINAL = false;
+
+  var deck = document.getElementById("deck");
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (MUTA_RASCUMPARAREA_LA_FINAL || /[?&]final\b/.test(location.search)) {
+    deck.appendChild(document.getElementById("rascumparare"));
+  }
+
+  var slides = Array.prototype.slice.call(deck.querySelectorAll(".slide"));
+  var total = slides.length;
+  var current = -1;
+  var pendingReset = null; // slide-ul ale cărui fragmente pornesc ascunse
+  var progressBar = document.querySelector(".progress");
+  var progressFill = document.getElementById("progressFill");
+  var slideNow = document.getElementById("slideNow");
+  var btnPrev = document.getElementById("btnPrev");
+  var btnNext = document.getElementById("btnNext");
+  var btnFs = document.getElementById("btnFs");
+
+  document.getElementById("slideTotal").textContent = total;
+  progressBar.setAttribute("aria-valuemax", total);
+  slides.forEach(function (s, i) {
+    var num = s.querySelector(".kicker .num");
+    if (num) num.textContent = String(i + 1).padStart(2, "0");
+    s.setAttribute("aria-label", "Slide " + (i + 1) + " din " + total + ": " + s.getAttribute("aria-label"));
+  });
+
+  /* ---------- Fragmente ---------- */
+  function fragments(slide) { return slide.querySelectorAll("[data-fragment]"); }
+  function hiddenFragments(slide) { return slide.querySelectorAll("[data-fragment]:not(.shown)"); }
+
+  function updateChrome() {
+    var slide = slides[current];
+    var hidden = hiddenFragments(slide).length;
+    slide.classList.toggle("has-hidden", hidden > 0);
+    slideNow.textContent = current + 1;
+    progressFill.style.width = ((current + 1) / total) * 100 + "%";
+    progressBar.setAttribute("aria-valuenow", current + 1);
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === total - 1 && hidden === 0;
+  }
+
+  function setActive(i) {
+    if (i === current) return;
+    current = i;
+    slides.forEach(function (s, k) { s.classList.toggle("is-active", k === i); });
+    var frags = fragments(slides[i]);
+    var reset = pendingReset === i;
+    for (var f = 0; f < frags.length; f++) frags[f].classList.toggle("shown", !reset);
+    if (reset) pendingReset = null;
+    updateChrome();
+    try { history.replaceState(null, "", "#" + (i + 1)); } catch (e) { /* file:// în unele browsere */ }
+  }
+
+  /* ---------- Navigare ---------- */
+  function goTo(i, opts) {
+    i = Math.max(0, Math.min(total - 1, i));
+    if (opts && opts.forward && fragments(slides[i]).length) pendingReset = i;
+    slides[i].scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+  function next() {
+    var hidden = hiddenFragments(slides[current]);
+    if (hidden.length) { hidden[0].classList.add("shown"); updateChrome(); return; }
+    if (current < total - 1) goTo(current + 1, { forward: true });
+  }
+  function prev() { if (current > 0) goTo(current - 1); }
+
+  // Slide-ul activ = cel care acoperă mijlocul ecranului (merge și cu slide-uri mai înalte pe telefon).
+  function detect() {
+    var mid = deck.clientHeight / 2;
+    for (var i = 0; i < total; i++) {
+      var r = slides[i].getBoundingClientRect();
+      if (r.top <= mid && r.bottom > mid) { setActive(i); return; }
+    }
+  }
+  var ticking = false;
+  deck.addEventListener("scroll", function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { ticking = false; detect(); });
+  }, { passive: true });
+  window.addEventListener("resize", detect);
+
+  btnNext.addEventListener("click", next);
+  btnPrev.addEventListener("click", prev);
+
+  // Click pe un card-fantomă îl dezvăluie (împreună cu cele dinaintea lui).
+  slides.forEach(function (s) {
+    var frags = fragments(s);
+    Array.prototype.forEach.call(frags, function (f, idx) {
+      f.addEventListener("click", function () {
+        if (f.classList.contains("shown")) return;
+        for (var k = 0; k <= idx; k++) frags[k].classList.add("shown");
+        updateChrome();
+      });
+    });
+  });
+
+  /* ---------- Ecran complet ---------- */
+  function isFs() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function toggleFs() {
+    var el = document.documentElement;
+    try {
+      if (!isFs()) {
+        var req = el.requestFullscreen || el.webkitRequestFullscreen;
+        var p = req && req.call(el);
+        if (p && p.catch) p.catch(function () {});
+      } else {
+        var exit = document.exitFullscreen || document.webkitExitFullscreen;
+        var q = exit && exit.call(document);
+        if (q && q.catch) q.catch(function () {});
+      }
+    } catch (e) { /* browserul a refuzat */ }
+  }
+  function syncFsLabel() { btnFs.setAttribute("aria-label", isFs() ? "Ieși din ecran complet (F)" : "Ecran complet (F)"); }
+  btnFs.addEventListener("click", toggleFs);
+  document.addEventListener("fullscreenchange", syncFsLabel);
+  document.addEventListener("webkitfullscreenchange", syncFsLabel);
+
+  /* ---------- Tastatură ---------- */
+  document.addEventListener("keydown", function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var t = e.target;
+    var inField = t.matches && t.matches("textarea, select, input:not([type=checkbox]):not([type=button]):not([type=submit]):not([type=reset])");
+    if (inField) { if (e.key === "Escape") t.blur(); return; }
+    var onButton = t.closest && t.closest("button, a, label, summary, input");
+    switch (e.key) {
+      case "ArrowRight": case "ArrowDown": case "PageDown":
+        e.preventDefault(); next(); break;
+      case "ArrowLeft": case "ArrowUp": case "PageUp":
+        e.preventDefault(); prev(); break;
+      case " ":
+        if (onButton) return;
+        e.preventDefault(); e.shiftKey ? prev() : next(); break;
+      case "Home": e.preventDefault(); goTo(0); break;
+      case "End": e.preventDefault(); goTo(total - 1); break;
+      case "f": case "F": e.preventDefault(); toggleFs(); break;
+    }
+  });
+
+  /* ---------- Slide 4: Verdictul deciziei ---------- */
+  var vForm = document.getElementById("verdictForm");
+  var vBox = document.getElementById("verdictBox");
+  var vTitle = document.getElementById("verdictTitle");
+  var vMsg = document.getElementById("verdictMsg");
+  var vDecision = document.getElementById("verdictDecision");
+  var LENSES = ["trecut", "prezent", "viitor"];
+  var VERDICTS = {
+    green: ["Verde: mergi înainte", "Toate cele trei lentile spun da. Decide și asumă-ți decizia."],
+    yellow: ["Galben: încetinește", "Cel puțin o lentilă ezită. Amână 24 de ore și află ce-ți lipsește."],
+    red: ["Roșu: oprește-te", "Toate lentilele spun nu. Asta nu e o decizie, e un regret programat."]
+  };
+
+  function updateVerdict() {
+    var vals = LENSES.map(function (n) { return vForm.elements[n].value; });
+    var answered = vals.filter(Boolean).length;
+    var state;
+    if (answered < 3) state = "empty";
+    else if (vals.every(function (v) { return v === "da"; })) state = "green";
+    else if (vals.every(function (v) { return v === "nu"; })) state = "red";
+    else state = "yellow"; // orice amestec de Nu / Nu știu
+    vBox.dataset.state = state;
+    if (state === "empty") {
+      vTitle.textContent = "Aștept răspunsurile";
+      vMsg.textContent = "Ai răspuns la " + answered + " din 3 întrebări.";
+    } else {
+      vTitle.textContent = VERDICTS[state][0];
+      vMsg.textContent = VERDICTS[state][1];
+    }
+    var d = vForm.elements.decizie.value.trim();
+    vDecision.textContent = d ? "Decizia: „" + d + "”" : "";
+  }
+  vForm.addEventListener("change", updateVerdict);
+  vForm.addEventListener("input", updateVerdict);
+  vForm.addEventListener("submit", function (e) { e.preventDefault(); });
+  document.getElementById("verdictReset").addEventListener("click", function () {
+    vForm.reset();
+    updateVerdict();
+    vForm.elements.decizie.focus({ preventScroll: true });
+  });
+
+  /* ---------- Slide 5: Harta conexiunilor ---------- */
+  var map = document.getElementById("map");
+  var mapLines = document.getElementById("mapLines");
+  var mapDetail = document.getElementById("mapDetail");
+  var nodes = Array.prototype.slice.call(map.querySelectorAll("button.node"));
+  var lines = [];
+  var SVGNS = "http://www.w3.org/2000/svg";
+
+  nodes.forEach(function (node, i) {
+    var a = -Math.PI / 2 + (i * 2 * Math.PI) / nodes.length;
+    var x = 50 + 39 * Math.cos(a);
+    var y = 50 + 39 * Math.sin(a);
+    node.style.left = x + "%";
+    node.style.top = y + "%";
+    var line = document.createElementNS(SVGNS, "line");
+    line.setAttribute("x1", 50); line.setAttribute("y1", 50);
+    line.setAttribute("x2", x); line.setAttribute("y2", y);
+    mapLines.appendChild(line);
+    lines.push(line);
+
+    function show() {
+      nodes.forEach(function (n, k) {
+        n.classList.toggle("is-on", k === i);
+        n.setAttribute("aria-pressed", k === i ? "true" : "false");
+        lines[k].classList.toggle("is-on", k === i);
+      });
+      mapDetail.innerHTML = "";
+      var h = document.createElement("h3"); h.textContent = node.querySelector("strong").textContent;
+      var who = document.createElement("p"); who.className = "who"; who.textContent = node.querySelector("span").textContent;
+      var idea = document.createElement("p"); idea.textContent = node.dataset.idea;
+      var link = document.createElement("p"); link.className = "link";
+      var b = document.createElement("b"); b.textContent = "Legătura: ";
+      link.appendChild(b); link.appendChild(document.createTextNode(node.dataset.link));
+      mapDetail.append(h, who, idea, link);
+    }
+    node.setAttribute("aria-pressed", "false");
+    node.addEventListener("mouseenter", show);
+    node.addEventListener("focus", show);
+    node.addEventListener("click", show);
+  });
+
+  /* ---------- Slide 6: Exercițiul de răscumpărare ---------- */
+  var rForm = document.getElementById("redeemForm");
+  var rOut = document.getElementById("redeemOut");
+  rForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var a = rForm.elements.greseala.value.trim();
+    var b = rForm.elements.lectie.value.trim();
+    var c = rForm.elements.azi.value.trim();
+    rOut.textContent = "";
+    if (!a || !b || !c) {
+      rOut.dataset.state = "warn";
+      rOut.textContent = "Completează toate cele trei câmpuri. Al treilea e cel care contează.";
+      return;
+    }
+    rOut.dataset.state = "ok";
+    function strong(txt) { var s = document.createElement("strong"); s.textContent = txt; return s; }
+    rOut.append("Am pierdut timp cu ", strong(a), ". M-a învățat că ", strong(b),
+      ". De azi: ", strong(c), ". Așa, timpul acela nu a fost în zadar.");
+  });
+  rForm.addEventListener("reset", function () { rOut.textContent = ""; delete rOut.dataset.state; });
+
+  /* ---------- Slide 8: Checklist ---------- */
+  var checks = Array.prototype.slice.call(document.querySelectorAll("#checklist input"));
+  var planStatus = document.getElementById("planStatus");
+  function updatePlan() {
+    var done = 0;
+    checks.forEach(function (c) { c.closest(".check").classList.toggle("is-done", c.checked); if (c.checked) done++; });
+    var all = done === checks.length;
+    planStatus.textContent = all ? "Gata. Ai un plan pentru următoarele 24 de ore." : done + " / " + checks.length + " pași bifați";
+    planStatus.classList.toggle("is-done", all);
+  }
+  checks.forEach(function (c) { c.addEventListener("change", updatePlan); });
+
+  /* ---------- Start ---------- */
+  var start = parseInt(location.hash.slice(1), 10);
+  if (start >= 1 && start <= total) deck.scrollTop = slides[start - 1].offsetTop;
+  detect();
+  if (current === -1) setActive(0);
+})();
+</script>
+</body>
+</html>
